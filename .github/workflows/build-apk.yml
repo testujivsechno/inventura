@@ -298,6 +298,8 @@ jobs:
 
       - name: Nastavení Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
 
       - name: Sestavení instalačního APK
         working-directory: android
