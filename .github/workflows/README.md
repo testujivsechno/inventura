@@ -1,0 +1,1 @@
+Sestavení aplikace Inventura
