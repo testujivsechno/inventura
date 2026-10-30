@@ -233,6 +233,11 @@ jobs:
           unzip -q "$RUNNER_TEMP/inventura-project.zip" -d "$RUNNER_TEMP/inventura-project"
           cp -R "$RUNNER_TEMP/inventura-project/inventura_android_project/android" ./android
 
+      - name: Kontrola nastavení Android WebView
+        run: |
+          echo "===== MAIN ACTIVITY ====="
+          sed -n '1,260p' android/app/src/main/java/cz/inventura/app/MainActivity.java
+          
       - name: Oprava motiv Android aplikace
         run: |
           sed -i 's|android:style/Theme.Material.DayNight.NoActionBar|@android:style/Theme.Material.NoActionBar|g' android/app/src/main/res/values/styles.xml
