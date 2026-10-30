@@ -232,6 +232,10 @@ jobs:
           mkdir -p "$RUNNER_TEMP/inventura-project"
           unzip -q "$RUNNER_TEMP/inventura-project.zip" -d "$RUNNER_TEMP/inventura-project"
           cp -R "$RUNNER_TEMP/inventura-project/inventura_android_project/android" ./android
+
+      - name: Oprava motiv Android aplikace
+        run: |
+          sed -i 's|android:style/Theme.Material.DayNight.NoActionBar|@android:style/Theme.Material.NoActionBar|g' android/app/src/main/res/values/styles.xml
           
       - name: Nastavení Gradle
         uses: gradle/actions/setup-gradle@v4
