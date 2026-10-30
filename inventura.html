@@ -515,7 +515,14 @@ function tabSum(){
  if(v.by==='o'&&v.loc){v.sn=v.loc;}
  v.tab='sum';render();scrollTo(0,0);
 }
-function tabSet(){v.tab='set';render();scrollTo(0,0)}
+function tabSet(){
+  v.tab='set';
+  render();
+  scrollTo(0,0);
+  if(!cameraOptions.length){
+    setTimeout(testCameras,100);
+  }
+}
 function closeS(){camOff();v.hist=false;v.xph=null;v.rs=false;v.it=null;v.sc=false;v.res=null;render()}
 function openItem(k,fs){camOff();v.hist=false;v.sc=false;v.res=null;v.fs=!!fs;v.it=k;const d=D.find(x=>x.k===k),r=S.r[k];v.q=r&&r.q!=null?r.q:d.q;
  v.m=d.q>1?{lab:r&&r.nl!=null?r.nl:v.q,inv:r&&r.ni!=null?r.ni:v.q,use:r&&r.nu!=null?r.nu:v.q}:null;render()}
