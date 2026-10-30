@@ -285,11 +285,11 @@ jobs:
             AKSBlDUAAGludmVudHVyYV9hbmRyb2lkX3Byb2plY3QvLmdpdGh1Yi93b3JrZmxvd3MvYnVpbGQtYXBrLnltbFVUBQADWjDkanV4
             CwABBAAAAAAE6QMAAFBLAQIeAxQAAAAIAGsuXl0GbasPkwMAAFUGAAAnABgAAAAAAAEAAACkgd03AABpbnZlbnR1cmFfYW5kcm9p
             ZF9wcm9qZWN0L1JFQURNRS1DWi50eHRVVAUAA1ow5Gp1eAsAAQQAAAAABOkDAABQSwUGAAAAACAAIAD0DwAA0TsAAAAA
-          run: |
-            printf '%s' "$PROJECT_ZIP_B64" | base64 --decode > "$RUNNER_TEMP/inventura-project.zip"
-            mkdir -p "$RUNNER_TEMP/inventura-project"
-            unzip -q "$RUNNER_TEMP/inventura-project.zip" -d "$RUNNER_TEMP/inventura-project"
-            cp -R "$RUNNER_TEMP/inventura-project/inventura_android_project/android" ./android
+        run: |
+          printf '%s' "$PROJECT_ZIP_B64" | base64 --decode > "$RUNNER_TEMP/inventura-project.zip"
+          mkdir -p "$RUNNER_TEMP/inventura-project"
+          unzip -q "$RUNNER_TEMP/inventura-project.zip" -d "$RUNNER_TEMP/inventura-project"
+          cp -R "$RUNNER_TEMP/inventura-project/inventura_android_project/android" ./android
 
       - name: Nastavení Gradle
         uses: gradle/actions/setup-gradle@v4
