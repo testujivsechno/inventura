@@ -4,7 +4,6 @@
 <title>Inventura</title><link rel="manifest" href="inventura.json"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#14213D"><meta name="color-scheme" content="light dark">
 <style>
 :root{--bg:#EDEFF1;--surf:#fff;--ink:#14213D;--mut:#5B667A;--line:#D3D8DF;--acc:#FFC400;--ok:#1B7F52;--bad:#C0392B;--okbg:#DDF1E7;--badbg:#F7DEDB;--tbg:#FFF3C4;--or:#B85C00;--orbg:#FFE7CC;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1420;--surf:#18202F;--ink:#EAEEF5;--mut:#9AA6BA;--line:#2B364A;--ok:#4CC38A;--bad:#FF7B6B;--okbg:#14362A;--badbg:#3E1D1A;--tbg:#3B3410;--or:#FFB066;--orbg:#4A2E10;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#0E1420;--surf:#18202F;--ink:#EAEEF5;--mut:#9AA6BA;--line:#2B364A;--ok:#4CC38A;--bad:#FF7B6B;--okbg:#14362A;--badbg:#3E1D1A;--tbg:#3B3410;--or:#FFB066;--orbg:#4A2E10;color-scheme:dark}
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -158,17 +157,19 @@ const idText=value=>{
 };
 const KEY='inv-v1';let S={r:{},x:[],who:''};try{S=Object.assign(S,JSON.parse(localStorage.getItem(KEY)))}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
-const CK='inv-cfg-v1';let C={snd:true,vib:true,fs:1,bs:1,cs:1,fm:['code_128','code_39','ean_13','ean_8','itf','codabar','qr_code'],ar:'band',cf:2,val:true,vol:.6,theme:'auto',wake:true,bkOn:true,bkN:20,bkM:60,auto:false,bkQuit:true,ut:6,cam:'m',group:4,showO:true,showAll:true,showB:false};try{C=Object.assign(C,JSON.parse(localStorage.getItem(CK)))}catch(e){}
+const CK='inv-cfg-v1';let C={snd:true,vib:true,fs:1,bs:1,cs:1,fm:['code_128','code_39','ean_13','ean_8','itf','codabar','qr_code'],ar:'band',cf:2,val:true,vol:.6,theme:'dark',wake:true,bkOn:true,bkN:20,bkM:60,auto:false,bkQuit:true,ut:6,cam:'m',group:4,showO:true,showAll:true,showB:false};try{C=Object.assign(C,JSON.parse(localStorage.getItem(CK)))}catch(e){}
 if(!Array.isArray(C.fm)||!C.fm.length)C.fm=['code_128','code_39','ean_13','ean_8','itf','codabar','qr_code'];
 if(!Number.isInteger(+C.group)||+C.group<0||+C.group>12)C.group=4; C.group=+C.group;
 const saveC=()=>{try{localStorage.setItem(CK,JSON.stringify(C))}catch(e){}};
-const mqDark=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
-const sysDark=()=>!!(mqDark&&mqDark.matches);
-function applyTheme(){const de=document.documentElement,dark=C.theme==='dark'||(C.theme!=='light'&&sysDark());de.setAttribute('data-theme',dark?'dark':'light');const m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',dark?'#0E1420':'#14213D')}
+function applyTheme(){
+ const de=document.documentElement;
+ const dark=C.theme==='dark';
+ de.setAttribute('data-theme',dark?'dark':'light');
+ const m=document.querySelector('meta[name=theme-color]');
+ if(m)m.setAttribute('content',dark?'#0E1420':'#14213D');
+}
 function applyCfg(){const de=document.documentElement,st=de.style;applyTheme();st.setProperty('--fs',C.fs);st.setProperty('--bs',C.bs);st.setProperty('--cs',C.cs);st.setProperty('--camh',({s:'240px',m:'340px',l:'min(58vh,480px)'})[C.cam]||'340px')}
 applyCfg();
-try{mqDark&&(mqDark.addEventListener?mqDark.addEventListener('change',()=>{applyTheme();if(v.tab==='set')render()}):mqDark.addListener&&mqDark.addListener(()=>applyTheme()))}catch(e){}
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')applyTheme()});
 let WB,WS,COL={},D=[],locs=[],FN='',v={by:'o',sf:'',sn:'',tab:'home',loc:null,it:null,sc:false,res:null,q:0,f:'',fs:false,rs:false},tt;
 
 const stat=d=>{const r=S.r[d.k];if(!r)return 'c';if(r.s==='m')return 'm';if(d.q>1&&(r.q||0)<d.q)return 'p';return 'f'};
@@ -433,7 +434,7 @@ function pageSet(){
   tg('val','Ignorovat kódy bez čísla (aspoň 6 číslic)')+
   H3('Typy kódů')+'<p class="mut sm">Čím méně typů zapneš, tím rychlejší a přesnější je čtení. Nech zapnuté jen ty, které máš na štítcích.</p>'+fmts+
   '<p class="mut sm">'+(C.lf?'Naposledy přečtený typ kódu: <b>'+esc(fmtName(C.lf))+'</b>. Ostatní typy způsobují falešná čtení, např. přidanou nulu.':'Zatím nebyl přečten žádný kód. Po prvním skenu se tady zobrazí jeho typ.')+'</p><button class="btn" onclick="onlyFmt()">Nechat zapnutý typ kódu podle posledního čtení</button>';
- const vzhled='<label class="mut sm" for="thm">Tmavý / světlý režim</label><select id="thm" class="in" onchange="setTheme(this.value)">'+op('theme',[['auto','Podle systému'],['light','Světlý'],['dark','Tmavý']])+'</select><p class="mut sm">Zařízení právě hlásí: <b>'+(sysDark()?'tmavý':'světlý')+'</b> režim.</p>'+
+ const vzhled='<label class="mut sm" for="thm">Tmavý / světlý režim</label><select id="thm" class="in" onchange="setTheme(this.value)">'+op('theme',[['light','Světlý'],['dark','Tmavý']])+'</select>'+
   H3('Majetkové číslo')+'<label class="mut sm" for="grp">Vložit mezeru po každých X číslicích (jen na displeji)</label><select id="grp" class="in" onchange="setC(\'group\',+this.value);render()">'+op('group',[[0,'Bez mezer'],[3,'3 číslice'],[4,'4 číslice'],[5,'5 číslic'],[6,'6 číslic'],[7,'7 číslic'],[8,'8 číslic']])+'</select><p class="mut sm">Mezery slouží pouze pro přehledné zobrazení a zadávání. Do Excelu se majetkové číslo exportuje bez mezer.</p>'+
   H3('Velikost zobrazení')+'<p class="mut sm">Změna se projeví hned. 100 % je výchozí velikost.</p>'+sl('fs','Písmo')+sl('bs','Tlačítka a ovládací prvky')+sl('cs','Karty')+
   H3('Ukázka')+'<div class="row" style="cursor:default"><span><span class="num idn">'+esc(fmt('1234567890'))+'</span> <span class="mut sm">Počet: <b>1 ks</b></span></span><span></span><span class="span2">Ukázková karta položky</span></div><button class="btn" style="margin-bottom:10px">Ukázkové tlačítko</button><button class="btn" onclick="resetScale()">Obnovit výchozí velikosti</button>';
