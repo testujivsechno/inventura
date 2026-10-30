@@ -233,17 +233,61 @@ jobs:
           unzip -q "$RUNNER_TEMP/inventura-project.zip" -d "$RUNNER_TEMP/inventura-project"
           cp -R "$RUNNER_TEMP/inventura-project/inventura_android_project/android" ./android
 
-      - name: Kontrola úplného souboru MainActivity
+      
+      - name: Oprava vzhledu a potvrzení ukončení
         run: |
-          FILE="android/app/src/main/java/cz/inventura/app/MainActivity.java"
-          echo "===== POCET RADKU ====="
-          wc -l "$FILE"
-          echo "===== CAST 1 (radky 1-80) ====="
-          sed -n '1,80p' "$FILE"
-          echo "===== CAST 2 (radky 81-160) ====="
-          sed -n '81,160p' "$FILE"
-          echo "===== CAST 3 (radky 161-240) ====="
-          sed -n '161,240p' "$FILE"
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("android/app/src/main/java/cz/inventura/app/MainActivity.java")
+          source = path.read_text()
+
+          if "import android.app.AlertDialog;" not in source:
+              source = source.replace(
+                  "import android.app.Activity;",
+                  "import android.app.Activity;\nimport android.app.AlertDialog;",
+                  1
+              )
+
+          if "import android.webkit.JsResult;" not in source:
+              source = source.replace(
+                  "import android.webkit.WebChromeClient;",
+                  "import android.webkit.WebChromeClient;\nimport android.webkit.JsResult;",
+                  1
+              )
+
+          start = source.index("        // Přizpůsobí CSS prefers-color-scheme")
+          end = source.index("        webView.addJavascriptInterface", start)
+
+          source = source[:start] + """        // Vzhled řídí aplikace, WebView nesmí samo měnit barvy.
+                  WebSettings webSettings = webView.getSettings();
+                  if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+                      WebSettingsCompat.setAlgorithmicDarkeningAllowed(webSettings, false);
+                  } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                      webSettings.setForceDark(WebSettings.FORCE_DARK_OFF);
+                  }
+          """ + source[end:]
+
+          marker = "        webView.setWebChromeClient(new WebChromeClient() {\n"
+          replacement = marker + """            @Override public boolean onJsConfirm(WebView view, String url, String message, JsResult result) {
+                          new AlertDialog.Builder(MainActivity.this)
+                                  .setMessage("Ukončit aplikaci?")
+                                  .setNegativeButton("Zrušit", (dialog, which) -> result.cancel())
+                                  .setPositiveButton("Ukončit", (dialog, which) -> result.confirm())
+                                  .setOnCancelListener(dialog -> result.cancel())
+                                  .show();
+                          return true;
+                      }
+
+          """
+
+          if marker not in source:
+              raise SystemExit("CHYBA: Nepodařilo se najít WebChromeClient.")
+
+          source = source.replace(marker, replacement, 1)
+          path.write_text(source)
+          print("Oprava MainActivity dokončena.")
+          PY
           
       - name: Oprava motiv Android aplikace
         run: |
