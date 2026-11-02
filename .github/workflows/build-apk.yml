@@ -293,6 +293,24 @@ jobs:
         run: |
           sed -i 's|android:style/Theme.Material.DayNight.NoActionBar|@android:style/Theme.Material.NoActionBar|g' android/app/src/main/res/values/styles.xml
           
+      - name: Nahrazení ikony aplikace
+        run: |
+          test -f icon.svg || { echo "CHYBA: icon.svg nebyl v repozitáři nalezen."; exit 1; }
+          sudo apt-get update
+          sudo apt-get install -y librsvg2-bin
+          find android/app/src/main/res -path '*/mipmap-*' -name 'ic_launcher.png' -type f | while read -r f; do
+            case "$(dirname "$f")" in
+              *xxxhdpi) s=192;;
+              *xxhdpi) s=144;;
+              *xhdpi) s=96;;
+              *hdpi) s=72;;
+              *mdpi) s=48;;
+              *) s=192;;
+            esac
+            rsvg-convert -w "$s" -h "$s" icon.svg -o "$f"
+            echo "Ikona $f nahrazena (${s} px)"
+          done
+
       - name: Nastavení Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
