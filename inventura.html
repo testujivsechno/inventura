@@ -122,7 +122,7 @@ select.in{margin-bottom:4px}
 /* ===== Okno kamery: rámeček oblasti čtení a červená čára ===== */
 .cw{display:none;position:relative;margin:8px 0;border-radius:8px;overflow:hidden;background:#0b111c}
 .cw video{display:block;margin:0;width:100%;max-height:var(--camh,340px)}
-.aim{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border:2px solid rgba(255,196,0,.9);border-radius:8px;box-shadow:0 0 0 999px rgba(0,0,0,.38);pointer-events:none}
+.aim{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border:2px solid var(--acc);border-radius:8px;box-shadow:0 0 0 999px rgba(0,0,0,.38);pointer-events:none}
 .aim.full{border-color:transparent;box-shadow:none}
 .aim::after{content:"";position:absolute;left:4%;right:4%;top:50%;height:2px;margin-top:-1px;background:#ff2b2b;box-shadow:0 0 8px 2px rgba(255,43,43,.75);animation:ln 1s ease-in-out infinite alternate}
 @keyframes ln{from{opacity:.5}to{opacity:1}}
@@ -774,10 +774,16 @@ function camOff(){loopId++;clearTimeout(tm);clearInterval(tm);if(stream)stream.g
 async function photo(e){for(const f of e.target.files){try{const b=await createImageBitmap(f),t=await decImg(b);if(t){accept(t);break}else toast('Kód se nepodařilo přečíst.')}catch(x){toast('Foto se nepodařilo zpracovat')}}e.target.value=''}
 
 // Ochrana proti nechtěnému zavření stránky / gestu zpět při rozpracované inventuře
+// Vlastní potvrzovací okno (místo systémového confirm), barvy se řídí zvolenou barvou aplikace
+function askQ(msg,ok,cancel){return new Promise(res=>{const el=document.createElement('div');el.className='scrim';el.style.alignItems='center';el.style.zIndex=40;
+ el.innerHTML='<div class="sheet" role="alertdialog" aria-modal="true" style="max-width:420px;width:calc(100% - 32px);border-radius:12px"><h2></h2><p class="mut"></p><div class="two"><button class="btn" data-r="0"></button><button class="btn pri" data-r="1"></button></div></div>';
+ const b=el.querySelectorAll('button');{const p=String(msg).split('\n\n');el.querySelector('h2').textContent=p[0];const q=el.querySelector('p');if(p.length>1)q.textContent=p.slice(1).join(' ');else q.remove()}b[0].textContent=cancel||'Zrušit';b[1].textContent=ok||'OK';
+ const done=r=>{el.remove();res(r)};b[0].onclick=()=>done(false);b[1].onclick=()=>done(true);el.addEventListener('click',e=>{if(e.target===el)done(false)});
+ document.body.appendChild(el);b[1].focus()})}
 let quitting=false;
 async function quitApp(){
  const u=D.length?unsaved():0,bk=!!C.bkQuit&&u>0;
- if(!confirm('Ukončit aplikaci?'+(bk?'\n\nPřed ukončením se stáhne záloha ('+u+' nezálohovaných položek).':'')))return;
+ if(!await askQ('Ukončit aplikaci?'+(bk?'\n\nPřed ukončením se stáhne záloha ('+u+' nezálohovaných položek).':''),'Ukončit','Zrušit'))return;
  quitting=true;try{camOff()}catch(e){}
  if(bk){try{await backup(true)}catch(e){}await new Promise(r=>setTimeout(r,900))}
  save();saveC();
