@@ -12,11 +12,11 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .wrap{max-width:560px;margin:0 auto;padding:0 16px 150px}
 .top{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:14px 0 10px;z-index:5}
 h1{font:700 32px/1.1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;margin:0 0 4px;display:flex;align-items:center;justify-content:space-between}
-.offline-dot{width:10px;height:10px;background:var(--ok);border-radius:50%;display:inline-block;box-shadow:0 0 6px var(--ok);vertical-align:middle;margin-left:8px}
+.offline-dot{width:10px;height:10px;background:var(--ck);border-radius:50%;display:inline-block;box-shadow:0 0 6px var(--ck);vertical-align:middle;margin-left:8px}
 h2{font-size:20px;margin:6px 0 2px}
 .num{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:700;letter-spacing:.02em}
 .mut{color:var(--mut);margin:2px 0 8px}.sm{font-size:14px}
-.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok)}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ck)}
 .row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;width:100%;text-align:left;background:var(--surf);border:1px solid var(--line);border-left:1px solid var(--line);border-radius:8px;padding:12px;margin:0 0 8px;color:inherit;font:inherit;cursor:pointer;position:relative;overflow:hidden}
 .span2{grid-column:1/-1}.big{font-size:26px}.idn{font-size:22px}
 .pill{font-size:14px;font-weight:600;padding:2px 10px;border-radius:99px}.pill.f{background:var(--okbg);color:var(--ok)}.pill.m{background:var(--badbg);color:var(--bad)}.pill.x{background:var(--orbg);color:var(--or)}
@@ -33,7 +33,7 @@ h2{font-size:20px;margin:6px 0 2px}
 dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:10px 0}dt{color:var(--mut)}dd{margin:0}
 .qty,.sw{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
 .qty div{display:flex;align-items:center;gap:14px}.qty b{font-size:30px;min-width:36px;text-align:center}.sq{width:52px;padding:0}
-.sw input{width:28px;height:28px;accent-color:var(--ok)}
+.sw input{width:28px;height:28px;accent-color:var(--ck)}
 .in{width:100%;min-height:48px;margin:6px 0;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:16px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
@@ -107,8 +107,9 @@ label.btn{line-height:calc(48px*var(--bs))}
 .top .in{min-height:calc(48px*var(--bs))}
 .sw{min-height:calc(56px*var(--bs))}.sw input{width:calc(32px*var(--bs));height:calc(32px*var(--bs))}
 .xb{width:calc(48px*var(--bs));height:calc(48px*var(--bs))}
-:root[data-uni="1"] input[type=checkbox],:root[data-uni="1"] .rg{accent-color:var(--acc)}
-:root[data-uni="1"] .bar i{background:var(--acc)}
+:root{--ck:var(--ok)}
+:root[data-uni="1"]{--ck:var(--acc)}
+:root[data-uni="1"] input[type=checkbox]{accent-color:var(--ck)}
 .top{transition:transform .2s ease}.top.hid{transform:translateY(-120%)}
 .chips{display:flex;flex-wrap:wrap;overflow:visible;scroll-snap-type:none}
 .sws input{width:calc(27px*var(--bs));height:calc(27px*var(--bs))}
@@ -117,7 +118,7 @@ label.btn{line-height:calc(48px*var(--bs))}
 .row .big{font-size:calc(26px*var(--fs)*var(--cs))}
 .row .sm,.row .pill{font-size:calc(14px*var(--fs)*var(--cs))}
 .set{padding:10px 0;border-top:1px solid var(--line)}.set .hd{align-items:center}
-.rg{width:100%;accent-color:var(--ok);height:calc(36px*var(--bs));margin:4px 0 0}
+.rg{width:100%;accent-color:var(--ck);height:calc(36px*var(--bs));margin:4px 0 0}
 select.in{margin-bottom:4px}
 /* ===== Okno kamery: rámeček oblasti čtení a červená čára ===== */
 .cw{display:none;position:relative;margin:8px 0;border-radius:8px;overflow:hidden;background:#0b111c}
@@ -162,7 +163,7 @@ const idText=value=>{
 };
 const KEY='inv-v1';let S={r:{},x:[],who:''};try{S=Object.assign(S,JSON.parse(localStorage.getItem(KEY)))}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
-const CK='inv-cfg-v1';let C={snd:true,vib:true,fs:1,bs:1,cs:1,fm:['code_128','code_39','ean_13','ean_8','itf','codabar','qr_code'],ar:'band',cf:2,val:true,vol:.6,theme:'dark',accent:'daikin',uni:false,stick:true,wake:true,bkOn:true,bkN:20,bkM:60,auto:false,bkQuit:true,ut:6,cam:'m',group:4,showO:true,showAll:true,showB:false};try{C=Object.assign(C,JSON.parse(localStorage.getItem(CK)))}catch(e){}
+const CK='inv-cfg-v1';let C={snd:true,vib:true,fs:1,bs:1,cs:1,fm:['code_128','code_39','ean_13','ean_8','itf','codabar','qr_code'],ar:'band',cf:2,val:true,vol:.6,theme:'dark',accent:'daikin',uni:false,stick:true,dir:'Download/Inventura',wake:true,bkOn:true,bkN:20,bkM:60,auto:false,bkQuit:true,ut:6,cam:'m',group:4,showO:true,showAll:true,showB:false};try{C=Object.assign(C,JSON.parse(localStorage.getItem(CK)))}catch(e){}
 for(const k of ['fs','bs','cs']){C[k]=Math.min(1.3,Math.max(.7,+C[k]||1))}
 if(!Array.isArray(C.fm)||!C.fm.length)C.fm=['code_128','code_39','ean_13','ean_8','itf','codabar','qr_code'];
 if(!Number.isInteger(+C.group)||+C.group<0||+C.group>12)C.group=4; C.group=+C.group;
@@ -268,7 +269,40 @@ const idb=()=>new Promise((ok,no)=>{const q=indexedDB.open('inventura',1);q.onup
 const idbSet=async(k,val)=>{try{const d=await idb();await new Promise((ok,no)=>{const t=d.transaction('f','readwrite');t.objectStore('f').put(val,k);t.oncomplete=ok;t.onerror=()=>no(t.error)})}catch(e){}};
 const idbGet=async k=>{try{const d=await idb();return await new Promise((ok,no)=>{const q=d.transaction('f').objectStore('f').get(k);q.onsuccess=()=>ok(q.result);q.onerror=()=>no(q.error)})}catch(e){return null}};
 
-const saveFile=(blob,name)=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove()};
+// ===== Ukládání souborů: v APK do složky telefonu, v počítači do vybrané složky, jinak běžné stažení =====
+const DIR_DEF='Download/Inventura';
+const hasNat=m=>{try{return !!(window.Android&&typeof window.Android[m]==='function')}catch(e){return false}};
+const canPickDir=()=>typeof window.showDirectoryPicker==='function'&&!hasNat('saveFile');
+const cleanDir=p=>String(p||'').replace(/\\/g,'/').split('/').map(x=>x.trim().replace(/[<>:"|?*\x00-\x1f]/g,'')).filter(x=>x&&x!=='.'&&x!=='..').join('/').replace(/^download(?=\/|$)/i,'Download');
+let dirHandle=null;
+idbGet('dir').then(h=>{if(h&&typeof h==='object'){dirHandle=h;if(v.tab==='set'&&!v.it&&!v.sc&&!v.hist)render()}});
+// Vrací false při chybě, text s cestou při přesném uložení, jinak true
+async function saveFile(blob,name,auto){
+ const dir=cleanDir(C.dir);
+ if(hasNat('saveFile')||hasNat('saveFileTo')){
+  const url=await blobUrl(blob);if(!url)return false;
+  try{
+   if(hasNat('saveFileTo')&&/^Download(\/|$)/.test(dir)){
+    const r=String(Android.saveFileTo(name,url,dir));
+    if(r.indexOf('OK:')===0)return r.slice(3);
+    if(r==='PICKER')return auto?false:true;
+    return false}
+   if(auto)return false;
+   Android.saveFile(name,url);return true
+  }catch(e){return false}}
+ if(dirHandle&&canPickDir()){
+  try{let p=await dirHandle.queryPermission({mode:'readwrite'});if(p!=='granted')p=await dirHandle.requestPermission({mode:'readwrite'});
+   if(p==='granted'){const fh=await dirHandle.getFileHandle(name,{create:true}),w=await fh.createWritable();await w.write(blob);await w.close();return dirHandle.name+'/'+name}}catch(e){}}
+ try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();return true}catch(e){return false}}
+function dirNote(){
+ if(hasNat('saveFileTo'))return 'Telefon: soubory se ukládají přímo do složky Stažené soubory (Download). Cesta musí začínat Download/, například Download/Inventura. Při prázdné nebo jiné cestě a na Androidu starším než 10 se otevře okno Uložit jako.';
+ if(hasNat('saveFile'))return 'Tato verze aplikace při každém uložení otevře okno Uložit jako. Přímé ukládání do složky bude fungovat po sestavení nového APK.';
+ if(canPickDir())return 'Počítač: prohlížeč neumožňuje zapsat libovolnou cestu. Vyber složku tlačítkem níže a další soubory se do ní uloží bez ptaní. Napoprvé prohlížeč může požádat o povolení zápisu.';
+ return 'Tento prohlížeč ukládá soubory do své složky stahování, cestu zde nelze použít.'}
+function setDir(x){C.dir=cleanDir(x);saveC();const e=$('dir');if(e)e.value=C.dir;
+ if(hasNat('saveFileTo')&&C.dir&&!/^Download(\/|$)/.test(C.dir))toast('Přímo lze ukládat jen do Download/… Jiná cesta znamená okno Uložit jako.')}
+function resetDir(){C.dir=DIR_DEF;saveC();if(canPickDir()){dirHandle=null;idbSet('dir',null)}render();toast('Výchozí nastavení složky obnoveno')}
+async function pickDir(){try{const h=await window.showDirectoryPicker({id:'inventura',mode:'readwrite',startIn:'downloads'});dirHandle=h;await idbSet('dir',h);render();toast('Složka vybrána: '+h.name)}catch(e){}}
 const unsaved=()=>Math.max(0,D.filter(isDone).length-(S.bk?S.bk.n:0))+Math.max(0,S.x.length-(S.bk&&S.bk.x||0));
 const markSaved=()=>{S.bk={t:Date.now(),n:D.filter(isDone).length,x:S.x.length};save()};
 const bkInfo=()=>S.bk?'Poslední záloha nebo export: '+new Date(S.bk.t).toLocaleString('cs-CZ')+'. Od té doby zpracováno '+unsaved()+' položek.':'Záloha zatím nebyla uložena.';
@@ -277,8 +311,9 @@ async function backup(auto){
  const ph={};
  for(const x of S.x){if(x.ph&&x.t){try{const b=await idbGet('ph'+x.t);const u=b&&await blobUrl(b);if(u)ph[x.t]=u}catch(e){}}}
  const o={app:'inventura',ver:1,saved:new Date().toISOString(),file:FN,who:S.who||'',r:S.r,x:S.x,ph};
- saveFile(new Blob([JSON.stringify(o)],{type:'application/json'}),'Inventura_zaloha_'+new Date().toISOString().slice(0,16).replace(/[-:T]/g,'')+'.json');
- markSaved();if(!auto||(!v.sc&&!v.it))render();if(!auto)toast('Záloha uložena')}
+ const where=await saveFile(new Blob([JSON.stringify(o)],{type:'application/json'}),'Inventura_zaloha_'+new Date().toISOString().slice(0,16).replace(/[-:T]/g,'')+'.json',auto);
+ if(where===false){if(!auto)toast('Zálohu se nepodařilo uložit');return}
+ markSaved();if(!auto||(!v.sc&&!v.it))render();if(!auto)toast('Záloha uložena'+(typeof where==='string'?': '+where:''))}
 const nm=x=>norm(x).toLowerCase();
 // Starším záznamům bez autora se přiřadí aktuální jméno z tohoto telefonu
 function tagAuth(){if(!norm(S.who))return;let ch=false;for(const r of Object.values(S.r))if(!r.by){r.by=S.who;ch=true}for(const x of S.x)if(!x.by){x.by=S.who;ch=true}if(ch)save()}
@@ -320,7 +355,7 @@ function beep(type='ok',nv){
 const mcNote=(d,r)=>{if(!(d.q>1)||r.nl==null||!r.q)return '';return [['Štítek',r.nl],['Inventární stav',r.ni],['Používá se',r.nu]].filter(a=>a[1]<r.q).map(a=>a[0]+' '+a[1]+'/'+r.q).join('; ')};
 const STX={f:'nalezeno',m:'nenalezeno',p:'částečně',c:'nezpracováno'};
 function dupNote(d){if(!(d.dc>1))return '';const o=D.filter(x=>x.id===d.id&&x!==d).map(x=>'ř. '+(x.ri+1)+' '+STX[stat(x)]).join(', ');return 'Duplicitní číslo '+d.dn+'/'+d.dc+(stat(d)==='c'?' (nespárováno)':' (spárováno)')+'; ostatní řádky: '+o}
-function exp(mode){
+async function exp(mode){
  mode=mode==='all'?'all':'mine';const mineOnly=mode==='mine';
  if(!norm(S.who)){toast('Nejdřív vyplň své jméno.');const w=$('who');if(w)w.focus();return}
  tagAuth();
@@ -355,9 +390,12 @@ function exp(mode){
   if(WB.Sheets['Duplicity']){delete WB.Sheets['Duplicity'];WB.SheetNames=WB.SheetNames.filter(n=>n!=='Duplicity')}
   const dr=D.filter(d=>d.dc>1);
   if(dr.length)XLSX.utils.book_append_sheet(WB,XLSX.utils.aoa_to_sheet([['Majetkové číslo','Řádek v souboru','Popis','Výrobní číslo','Budova','Odpovědná osoba','Stav','Napočteno']].concat(dr.map(d=>[d.id,d.ri+1,d.p,d.sn,d.b,d.o,STX[stat(d)],S.r[d.k]?S.r[d.k].q:'']))),'Duplicity')}
- const out=XLSX.write(WB,{bookType:'xlsx',type:'array'}),a=document.createElement('a'),day=new Date().toISOString().slice(0,10);
- a.href=URL.createObjectURL(new Blob([out],{type:'application/octet-stream'}));a.download=mineOnly?'Inventura_'+norm(S.who).replace(/[^\p{L}\p{N}]+/gu,'_')+'_'+day+'.xlsx':'Inventura_sloucene_'+day+'.xlsx';document.body.appendChild(a);a.click();a.remove();markSaved();render();
- toast('Export uložen: '+wr+' řádků'+(skCf?', '.concat(skCf,' s konfliktem přeskočeno'):'')+(skOth?', '.concat(skOth,' už vyplnil někdo jiný'):''))}
+ const out=XLSX.write(WB,{bookType:'xlsx',type:'array'}),day=new Date().toISOString().slice(0,10),
+  fn=mineOnly?'Inventura_'+norm(S.who).replace(/[^\p{L}\p{N}]+/gu,'_')+'_'+day+'.xlsx':'Inventura_sloucene_'+day+'.xlsx';
+ const where=await saveFile(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),fn);
+ if(where===false){toast('Export se nepodařilo uložit');return}
+ markSaved();render();
+ toast('Export uložen'+(typeof where==='string'?' do '+where:'')+': '+wr+' řádků'+(skCf?', '.concat(skCf,' s konfliktem přeskočeno'):'')+(skOth?', '.concat(skOth,' už vyplnil někdo jiný'):''))}
 
 function pageHome(){
  const offlineIndicator = '<span class="offline-dot" title="Aplikace připravena pro offline provoz"></span>';
@@ -504,10 +542,13 @@ function pageSet(){
   H3('Majetkové číslo')+'<label class="mut sm" for="grp">Vložit mezeru po každých X číslicích (jen na displeji)</label><select id="grp" class="in" onchange="setC(\'group\',+this.value);render()">'+op('group',[[0,'Bez mezer'],[3,'3 číslice'],[4,'4 číslice'],[5,'5 číslic'],[6,'6 číslic'],[7,'7 číslic'],[8,'8 číslic']])+'</select><p class="mut sm">Mezery slouží pouze pro přehledné zobrazení a zadávání. Do Excelu se majetkové číslo exportuje bez mezer.</p>'+
   H3('Velikost zobrazení')+'<p class="mut sm">Změna se projeví hned. 100 % je výchozí velikost. Posuvník se mění jen tažením za tečku, klepnutí na lištu nic nezmění.</p>'+sl('fs','Písmo')+sl('bs','Tlačítka a ovládací prvky')+sl('cs','Karty')+
   H3('Ukázka')+'<div class="row" style="cursor:default"><span><span class="num idn">'+esc(fmt('1234567890'))+'</span> <span class="mut sm">Počet: <b>1 ks</b></span></span><span></span><span class="span2">Ukázková karta položky</span></div><button class="btn" style="margin-bottom:10px">Ukázkové tlačítko</button><button class="btn" onclick="resetScale()">Obnovit výchozí velikosti</button>';
+ const dirUI=H3('Kam ukládat soubory')+'<p class="mut sm">Zálohy (JSON) i exporty (xlsx) se ukládají do této složky.</p>'+
+  (canPickDir()?'<p><b>Vybraná složka:</b> '+esc(dirHandle?dirHandle.name:'zatím nevybrána')+'</p>':'<label class="mut sm" for="dir">Cesta ke složce</label><input id="dir" class="in" value="'+esc(C.dir||'')+'" placeholder="'+DIR_DEF+'" autocapitalize="off" autocomplete="off" spellcheck="false" onchange="setDir(this.value)">')+
+  '<p class="mut sm">'+esc(dirNote())+'</p>'+(canPickDir()?'<div class="two"><button class="btn" onclick="resetDir()">Zapomenout složku</button><button class="btn" onclick="pickDir()">Vybrat složku…</button></div>':'<button class="btn" onclick="resetDir()">Obnovit výchozí cestu</button>');
  const zaloha=tg('bkOn','Připomínat zálohu')+
   '<label class="mut sm" for="bkn">Po kolika nezálohovaných položkách</label><select id="bkn" class="in" onchange="setC(\'bkN\',+this.value)">'+op('bkN',[[0,'Vypnuto'],[10,'10 položek'],[20,'20 položek'],[50,'50 položek'],[100,'100 položek']])+'</select>'+
   '<label class="mut sm" for="bkm">Po kolika minutách od poslední zálohy</label><select id="bkm" class="in" onchange="setC(\'bkM\',+this.value)">'+op('bkM',[[0,'Vypnuto'],[15,'15 minut'],[30,'30 minut'],[60,'1 hodina'],[120,'2 hodiny']])+'</select>'+
-  H3('Automatická záloha')+tg('auto','Zálohu stáhnout automaticky (soubor JSON)')+tg('bkQuit','Při ukončení aplikace uložit zálohu (jsou-li nezálohované položky)')+'<p class="mut sm">Po dosažení limitu se záloha sama uloží mezi stažené soubory. Chrome na Androidu může jednou požádat o povolení více stažení, Safari na iPhonu automatické stahování může blokovat. Záloha obsahuje i fotky přebytků.</p><button class="btn" onclick="backup()">Uložit zálohu teď</button>';
+  dirUI+H3('Automatická záloha')+tg('auto','Zálohu stáhnout automaticky (soubor JSON)')+tg('bkQuit','Při ukončení aplikace uložit zálohu (jsou-li nezálohované položky)')+'<p class="mut sm">Po dosažení limitu se záloha sama uloží do nastavené složky. Chrome na Androidu může jednou požádat o povolení více stažení, Safari na iPhonu automatické stahování může blokovat. Záloha obsahuje i fotky přebytků.</p><button class="btn" onclick="backup()">Uložit zálohu teď</button>';
  const zvuk='<div class="set"><div class="hd"><label for="s_vol">Hlasitost</label><b class="num" id="sv_vol">'+Math.round((C.vol==null?.6:C.vol)*100)+' %</b></div><input id="s_vol" class="rg" type="range" min="0.1" max="1" step="0.05" value="'+(C.vol==null?.6:C.vol)+'" oninput="setVol(this.value)" onchange="testBeep()"></div>';
  const vraceni='<label class="mut sm" for="ut">Jak dlouho se zobrazuje hláška s tlačítkem Vrátit</label><select id="ut" class="in" onchange="setC(\'ut\',+this.value)">'+op('ut',[[3,'3 sekundy'],[6,'6 sekund (výchozí)'],[10,'10 sekund'],[15,'15 sekund'],[30,'30 sekund']])+'</select><p class="mut sm">Po zápisu položky nebo přebytku se na chvíli objeví hláška, kterou můžeš zápis vrátit. Starší zápisy jdou vrátit i potom na kartě Souhrn v části Poslední zápisy a vrácení.</p>';
  return '<header class="top"><h1>NASTAVENÍ</h1></header>'+
@@ -553,17 +594,20 @@ setInterval(()=>{const m=bkNag();if(m)toast(m.replace(' · ',''))},60000);
 function setTheme(x){C.theme=x;saveC();applyCfg()}
 function setAccent(k){if(!ACC[k])return;C.accent=k;saveC();applyTheme()}
 function setUni(x){C.uni=!!x;saveC();applyTheme()}
-function sheetItem(){const d=D.find(x=>x.k===v.it),r=S.r[d.k]||{lab:true,use:true};
+function sheetItem(){const d=D.find(x=>x.k===v.it),r0=S.r[d.k],r=r0&&r0.s!=='m'?r0:{lab:true,use:true,lc:r0&&r0.lc,nt:r0&&r0.nt};
  return '<div class="scrim" onclick="if(event.target===this)closeS()"><div class="sheet" role="dialog" aria-label="Karta položky"><div class="hd"><span class="tag"><span class="num idb">'+esc(fmt(d.id))+'</span></span><button class="xb" onclick="closeS()" aria-label="Zavřít">✕</button></div><h2>'+esc(d.p)+'</h2><p class="mut">'+esc(d.d)+'</p><dl><dt>Počet kusů</dt><dd>'+d.q+' '+esc(ju(d.ks))+'</dd><dt>Výrobní číslo</dt><dd>'+esc(d.sn||'–')+'</dd><dt>Umístění</dt><dd>'+esc(d.b+(d.u?' · '+d.u:''))+'</dd>'+(d.note?'<dt>Poznámky</dt><dd>'+esc(d.note)+'</dd>':'')+'<dt>Odpovědná osoba</dt><dd>'+esc(d.o||'–')+'</dd>'+(d.dc>1?'<dt>Duplicita</dt><dd>řádek '+d.dn+' z '+d.dc+' se stejným číslem</dd>':'')+'</dl>'+
  (v.loc&&d[v.by]!==v.loc?'<p class="warn">Patří do: '+esc(d[v.by])+'</p>':'')+
+ (r0&&r0.s==='m'?'<p class="warn">Dříve označeno jako Nenalezeno ('+esc(new Date(r0.t||0).toLocaleString('cs-CZ'))+(r0.by?', '+esc(r0.by):'')+').</p>':'')+
  (d.q>1?'<div class="qty"><span>Napočtený počet<br><span class="mut sm">v evidenci '+d.q+'</span></span><div><button class="btn sq" onclick="setQ(-1)" aria-label="Méně">−</button><b class="num" id="qv">'+v.q+'</b><button class="btn sq" onclick="setQ(1)" aria-label="Více">+</button></div></div><div id="qw" style="display:none"><p class="warn">Víc než v evidenci ('+d.q+' ks) zapsat nelze. Další kus zapiš jako Přebytek.</p><button class="btn" onclick="addExtra()">Zapsat kus navíc jako Přebytek</button></div>':'')+
- ''+swRows(d,r)+'<input id="lc" class="in" placeholder="Skutečné umístění, pokud se liší" value="'+esc(r.lc)+'"><input id="nt" class="in" placeholder="Poznámka" value="'+esc(r.nt)+'">'+(v.fs?'<label class="sw"><span>Po uložení skenovat další</span><input id="cont" type="checkbox"'+(S.cont!==false?' checked':'')+'></label>':'')+'<div class="two"><button class="btn bad" onclick="mark(\'m\')">Nenalezeno</button><button class="btn ok" onclick="mark(\'f\')">Nalezeno</button></div></div></div>'}
+ ''+swRows(d,r)+'<input id="lc" class="in" placeholder="Skutečné umístění, pokud se liší" value="'+esc(r.lc)+'"><input id="nt" class="in" placeholder="'+(v.fs?'Poznámka':'Poznámka (u Nenalezeno napiš, kde jsi hledal/a)')+'" value="'+esc(r.nt)+'">'+(v.fs?'<label class="sw"><span>Po uložení skenovat další</span><input id="cont" type="checkbox"'+(S.cont!==false?' checked':'')+'></label>':'')+''+(v.fs?'<button class="btn ok" onclick="mark(\'f\')">Nalezeno</button>':'<div class="two"><button class="btn bad" onclick="mark(\'m\')">Nenalezeno</button><button class="btn ok" onclick="mark(\'f\')">Nalezeno</button></div>')+'</div></div>'}
 
 function pickRow(d){return '<button class="row" onclick="openItem(\''+d.k+'\',true)"><span><span class="num idn">'+esc(fmt(d.id))+'</span>'+(d.dc>1?' <span class="mut sm">řádek '+d.dn+' z '+d.dc+'</span>':'')+'</span><span>'+pill(d)+'</span><span class="span2">'+esc(d.p)+'</span><span class="span2 mut sm">'+esc([d.sn?'S/N '+d.sn:'',d.b+(d.u?' · '+d.u:''),d.o].filter(Boolean).join(' · '))+'</span></button>'}
 function sheetScan(){const x=v.res,A=aimDims();let b;
  if(!x)b='<div class="two"><button class="btn pri" onclick="snap()">Vyfotit štítek</button><button class="btn" onclick="doScan()">Najít</button></div><input id="ph" type="file" accept="image/*" hidden onchange="photo(event)">';
  else if(x.pick)b='<p class="warn">Číslo '+esc(fmt(x.n))+' je v evidenci vícekrát ('+x.dc+' řádky). Vyber, který kus právě eviduješ:</p>'+x.pick.map(pickRow).join('');
- else if(x.dup)b='<p class="warn">Štítek '+esc(fmt(x.n))+' už je zaznamenaný.</p><p class="mut sm">Pokud jde o další fyzický kus se stejným štítkem, zapiš ho jako přebytek. Jinak záznam otevři a uprav, nebo skenuj dál.</p>'+x.dup.map(pickRow).join('')+'<button class="btn" onclick="addDup()">Zapsat další kus jako přebytek</button><button class="btn pri" style="margin-top:10px" onclick="rescan()">Skenovat dál</button>';
+ else if(x.dup){const mm=x.dup.filter(d=>{const r=S.r[d.k];return r&&r.s==='m'}),ok=x.dup.length>mm.length;
+  if(mm.length)b='<p class="warn">Štítek '+esc(fmt(x.n))+' byl dříve označen jako Nenalezeno.</p><p class="mut sm">Majetek se teď našel. Otevři záznam a změň ho na Nalezeno.</p>'+mm.map(d=>{const r=S.r[d.k];return pickRow(d)+'<p class="mut sm">Nenalezeno '+esc(new Date(r.t||0).toLocaleString('cs-CZ'))+(r.by?', '+esc(r.by):'')+(r.nt?': '+esc(r.nt):'')+'</p>'}).join('')+(ok?'<p class="mut sm">Jiný kus se stejným štítkem je už zaznamenaný. Pokud jde o další fyzický kus, zapiš ho jako přebytek.</p><button class="btn" onclick="addDup()">Zapsat další kus jako přebytek</button>':'')+'<button class="btn pri" style="margin-top:10px" onclick="rescan()">Skenovat dál</button>';
+  else b='<p class="warn">Štítek '+esc(fmt(x.n))+' už je zaznamenaný.</p><p class="mut sm">Pokud jde o další fyzický kus se stejným štítkem, zapiš ho jako přebytek. Jinak záznam otevři a uprav, nebo skenuj dál.</p>'+x.dup.map(pickRow).join('')+'<button class="btn" onclick="addDup()">Zapsat další kus jako přebytek</button><button class="btn pri" style="margin-top:10px" onclick="rescan()">Skenovat dál</button>';}
  else if(x.o)b='<p class="warn">Číslo patří do: '+esc(x.o[v.by])+': '+esc(x.o.p)+'</p><button class="btn" onclick="openItem(\''+x.o.k+'\',true)">Otevřít přesto</button>';
  else b='<p class="warn">Číslo není v evidenci.</p>'+(x.xd?'<p class="mut sm">Tento přebytek už je zapsaný. Zapsáním přidáš další kus.</p>':'')+'<input id="xp" class="in" placeholder="Popis nalezeného majetku"><label class="btn" for="xph" style="margin:0 0 10px">Vyfotit nalezený majetek</label><input id="xph" type="file" accept="image/*" capture="environment" hidden onchange="xPre(event)"><img id="xpv" class="th" style="display:none;margin:0 0 10px" alt="Náhled fotky"><button class="btn ok" onclick="addX()">Zapsat přebytek</button><button class="btn" style="margin-top:10px" onclick="rescan()">Skenovat dál</button>';
  return '<div class="scrim" onclick="if(event.target===this)closeS()"><div class="sheet" role="dialog" aria-label="Skenování"><div class="hd"><h2>Skenování štítku</h2><button class="xb" onclick="closeS()" aria-label="Zavřít">✕</button></div><div class="cw" id="cw" onclick="focusTap()"><video id="vid" playsinline muted></video><div class="aim'+(A.m==='full'?' full':'')+'" id="aim" style="width:'+Math.round(A.ww*100)+'%;height:'+Math.round(A.hh*100)+'%"></div><button class="tb" id="tb" onclick="torch()">Svítilna</button></div><input id="zm" class="rg" type="range" style="display:none" oninput="setZoom(this.value)" aria-label="Zoom kamery"><button class="btn pri" id="cam" onclick="camOn()" style="display:none">Zkusit kameru znovu</button><p class="mut sm" id="cst"></p><p class="mut sm">Kamera čte kód sama. Drž telefon klidně a namiř červenou čáru na čárový kód. Začni asi z 15–25 cm; pokud je obraz rozmazaný, trochu telefon oddal a klepni na obraz pro nové zaostření. Posuvníkem přibližuj jen postupně. Když se kód nedaří, použij Vyfotit štítek.</p><input id="sn" class="in" inputmode="numeric" autocomplete="off" placeholder="Nebo zadej majetkové číslo" value="'+(x?esc(fmt(x.n)):'')+'" oninput="formatScanInput(this)" onkeydown="if(event.key===\'Enter\')doScan()">'+b+'</div></div>'}
@@ -572,7 +616,11 @@ function render(){const p=v.tab==='sum'?pageSum():v.tab==='set'?pageSet():v.loc?
  $('app').innerHTML=p+'<nav class="nav"><button class="'+(v.tab==='home'?'on':'')+'" onclick="tabHome()">INVENTURA</button><button class="'+(v.tab==='sum'?'on':'')+'" onclick="tabSum()">SOUHRN</button><button class="'+(v.tab==='set'?'on':'')+'" onclick="tabSet()" aria-label="Nastavení" title="Nastavení"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button><button onclick="quitApp()" aria-label="Ukončit aplikaci" title="Ukončit aplikaci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button></nav>'+(v.hist?sheetHist():v.it?sheetItem():v.sc?sheetScan():'')+(v.rs?sheetReset():'')+(v.nf?sheetNew():'');if(v.tab==='set')chkApk();loadPhotos()}
 function go(l){v.tab='home';v.loc=l||null;v.f='';v.sf='';render();scrollTo(0,0)}
 function goAll(){v.tab='home';v.loc=ALL_LOC;v.f='';v.sf='';render();scrollTo(0,0)}
+let NB=false;const TST=[];
+// Zásobník předchozích záložek pro tlačítko Zpět
+function navTab(to){if(NB||v.tab===to)return;if(TST.length&&TST[TST.length-1]===to)TST.pop();else{TST.push(v.tab);if(TST.length>20)TST.shift()}}
 function tabHome(){
+ navTab('home');
  const from=v.tab;v.tab='home';
  if(v.sn&&from==='sum'&&C.showO){
   v.by='o';S.by='o';save();v.loc=v.sn;
@@ -580,10 +628,12 @@ function tabHome(){
  render();scrollTo(0,0);
 }
 function tabSum(){
+ navTab('sum');
  if(v.by==='o'&&v.loc){v.sn=v.loc;}
  v.tab='sum';render();scrollTo(0,0);
 }
 function tabSet(){
+  navTab('set');
   v.tab='set';
   render();
   scrollTo(0,0);
@@ -593,7 +643,7 @@ function tabSet(){
   }
 }
 function closeS(){camOff();v.hist=false;v.xph=null;v.rs=false;v.it=null;v.sc=false;v.res=null;render()}
-function openItem(k,fs){camOff();v.hist=false;v.sc=false;v.res=null;v.fs=!!fs;v.it=k;const d=D.find(x=>x.k===k),r=S.r[k];v.q=Math.min(d.q,r&&r.q!=null?r.q:d.q);
+function openItem(k,fs){camOff();v.hist=false;v.sc=false;v.res=null;v.fs=!!fs;v.it=k;const d=D.find(x=>x.k===k),r0=S.r[k],r=r0&&r0.s==='m'?null:r0;v.q=Math.min(d.q,r&&r.q!=null?r.q:d.q);
  v.m=d.q>1?{lab:r&&r.nl!=null?r.nl:v.q,inv:r&&r.ni!=null?r.ni:v.q,use:r&&r.nu!=null?r.nu:v.q}:null;render()}
 function setQ(n){const d=D.find(x=>x.k===v.it),old=v.q;
  if(n>0&&d&&v.q>=d.q){beep('warn');const w=$('qw');if(w)w.style.display='block';return}
@@ -608,7 +658,7 @@ function swRows(d,r){
  return T.map(a=>{const on=a[0]==='inv'?r.inv!==false:!!r[a[0]];return '<label class="sw"><span>'+a[1]+'</span><input id="'+a[0]+'" type="checkbox"'+(on?' checked':'')+'></label>'}).join('')}
 function mark(s){const id=v.it,d=D.find(x=>x.k===id);const isFullQty=s==='m'||d.q<=1||v.q>=d.q;
  const fl=k=>d.q>1?(s==='f'&&v.q>0&&v.m[k]>=v.q):(s==='f'&&$(k).checked);
- if(!S.t0)S.t0=Date.now();const prev=S.r[id]?JSON.parse(JSON.stringify(S.r[id])):null;S.r[id]={s:isFullQty?s:'f',q:s==='m'?0:v.q,lab:fl('lab'),inv:fl('inv'),use:fl('use'),...(d.q>1?{nl:s==='f'?v.m.lab:0,ni:s==='f'?v.m.inv:0,nu:s==='f'?v.m.use:0}:{}),lc:$('lc').value,nt:$('nt').value,t:Date.now(),by:S.who||''};
+ if(!S.t0)S.t0=Date.now();const prev=S.r[id]?JSON.parse(JSON.stringify(S.r[id])):null;S.r[id]={s:isFullQty?s:'f',q:s==='m'?0:v.q,lab:fl('lab'),inv:fl('inv'),use:fl('use'),...(d.q>1?{nl:s==='f'?v.m.lab:0,ni:s==='f'?v.m.inv:0,nu:s==='f'?v.m.use:0}:{}),lc:s==='m'?'':$('lc').value,nt:$('nt').value,t:Date.now(),by:S.who||''};
  logPush({kind:'r',k:id,id:d.id,p:d.p,s,rt:S.r[id].t,prev});
  const ct=$('cont'),cont=v.fs&&ct&&ct.checked;if(ct)S.cont=ct.checked;
  save();v.it=null;let msg=(s==='f'?'Nalezeno: ':'Nenalezeno: ')+fmt(d.id);
@@ -642,7 +692,7 @@ function doScan(){
  // Vše už zaznamenáno: duplicitní sken
  beep('warn');v.res={n,dup:here};render()}
 function addExtra(){const d=D.find(x=>x.k===v.it);if(!d)return;const t=Date.now(),p='Kus navíc: '+d.p;S.x.push({n:d.id,p,l:v.by==='b'?v.loc:'',g:v.by+v.loc,t,by:S.who||''});logPush({kind:'x',xt:t,id:d.id,p});save();beep('ok');toast('Kus navíc zapsán jako Přebytek: '+fmt(d.id))}
-function addDup(){const d=v.res.dup[0],t=Date.now();S.x.push({n:d.id,p:'Duplicita: '+d.p,l:v.by==='b'?v.loc:'',g:v.by+v.loc,t,by:S.who||''});logPush({kind:'x',xt:t,id:d.id,p:'Duplicita: '+d.p});save();closeS();undoToast('Další kus zapsán jako přebytek: '+fmt(d.id))}
+function addDup(){const d=v.res.dup.find(z=>!(S.r[z.k]&&S.r[z.k].s==='m'))||v.res.dup[0],t=Date.now();S.x.push({n:d.id,p:'Duplicita: '+d.p,l:v.by==='b'?v.loc:'',g:v.by+v.loc,t,by:S.who||''});logPush({kind:'x',xt:t,id:d.id,p:'Duplicita: '+d.p});save();closeS();undoToast('Další kus zapsán jako přebytek: '+fmt(d.id))}
 function rescan(){v.xph=null;v.res=null;render();setTimeout(camOn,60)}
 async function addX(){const t=Date.now(),x={n:v.res.n,p:$('xp').value,l:v.by==='b'?v.loc:'',g:v.by+v.loc,t,by:S.who||''};
  if(v.xph){await idbSet('ph'+t,v.xph);x.ph=1;v.xph=null}
@@ -787,8 +837,33 @@ async function quitApp(){
  quitting=true;try{camOff()}catch(e){}
  if(bk){try{await backup(true)}catch(e){}await new Promise(r=>setTimeout(r,900))}
  save();saveC();
+ try{if(hasNat('closeApp')){Android.closeApp();return}}catch(e){}
  try{window.close()}catch(e){}
  setTimeout(()=>{quitting=false;toast(/iphone|ipad|ipod/i.test(navigator.userAgent)?'Aplikaci zavřeš přejetím od spodní hrany displeje nahoru':'Aplikaci zavřeš přepnutím aplikací a odsunutím této karty')},400)}
+// ===== Tlačítko Zpět vždy vrací o krok a aplikaci nezavře =====
+function backStep(){
+ const dlg=document.querySelector('body > .scrim');
+ if(dlg){const b=dlg.querySelector('button');if(b)b.click();return}
+ if(v.nf){nfCancel();return}
+ if(v.hist||v.it||v.sc||v.rs){closeS();return}
+ if(v.tab==='home'&&v.loc){go(null);return}
+ if(TST.length){const t=TST.pop();NB=true;try{t==='sum'?tabSum():t==='set'?tabSet():tabHome()}finally{NB=false}return}
+ toast('Zpět už není kam. Aplikaci ukončíš tlačítkem vypnutí vpravo dole.')}
+try{history.replaceState({inv:'base'},'');history.pushState({inv:'app'},'')}catch(e){}
+window.addEventListener('popstate',e=>{if(e.state&&e.state.inv==='app')return;backStep();try{history.pushState({inv:'app'},'')}catch(x){}});
+// ===== Přejetí prstem střídá jen záložky Inventura a Souhrn (nekonečná smyčka) =====
+(function(){let sx=0,sy=0,st=0,ok=false;
+ const blocked=el=>{for(let n=el;n&&n!==document.body;n=n.parentElement){const t=n.tagName,c=n.classList;
+  if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT'||t==='VIDEO'||(c&&(c.contains('cw')||c.contains('rg'))))return true;
+  if(n.scrollWidth>n.clientWidth+4){const o=getComputedStyle(n).overflowX;if(o==='auto'||o==='scroll')return true}}return false};
+ document.addEventListener('touchstart',e=>{ok=false;if(e.touches.length!==1)return;
+  if(v.it||v.sc||v.hist||v.rs||v.nf||(v.tab!=='home'&&v.tab!=='sum')||document.querySelector('body > .scrim'))return;
+  if(blocked(e.target))return;const t=e.touches[0];sx=t.clientX;sy=t.clientY;st=Date.now();ok=true},{passive:true});
+ document.addEventListener('touchend',e=>{if(!ok)return;ok=false;const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;
+  if(Date.now()-st>800||Math.abs(dx)<Math.max(70,innerWidth*.2)||Math.abs(dy)>Math.abs(dx)*.5)return;
+  if(String(getSelection()).length)return;
+  if(v.tab==='home')tabSum();else tabHome()},{passive:true});
+ document.addEventListener('touchcancel',()=>{ok=false},{passive:true})})();
 window.addEventListener('beforeunload', e => {
  if(quitting)return;
  if(unsaved() > 0){
