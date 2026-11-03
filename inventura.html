@@ -781,71 +781,32 @@ async function openCam(){
  const auto=()=>get({facingMode:{ideal:'environment'}});
  if(!C.deviceId)return {s:await auto()};
  try{return {s:await get({deviceId:{exact:C.deviceId}})}}catch(e){}
- const s=await auto();
+ // Uložené ID po novém spuštění neplatí (Android ho mohl změnit). Na chvíli se otevře automatická kamera, aby šly zjistit názvy, hned se zavře
+ // a uložená kamera se otevře podle názvu. Dvě kamery najednou většina telefonů neotevře, proto se první musí zavřít.
+ let m=null;
  try{
+  const t=await auto();t.getTracks().forEach(x=>x.stop());
   const ds=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
-  const m=C.deviceLabel&&ds.find(d=>d.label===C.deviceLabel);
-  if(m){const s2=await get({deviceId:{exact:m.deviceId}});s.getTracks().forEach(t=>t.stop());C.deviceId=m.deviceId;saveC();return {s:s2}}
+  m=C.deviceLabel&&ds.find(d=>d.label===C.deviceLabel)||null;
+  await new Promise(r=>setTimeout(r,200));
  }catch(e){}
- return {s,fb:true};
+ if(m){try{const s2=await get({deviceId:{exact:m.deviceId}});C.deviceId=m.deviceId;saveC();return {s:s2}}catch(e){}}
+ return {s:await auto(),fb:true};
 }
-// ===== Společná inicializace automatického ostření =====
-async function initializeCameraFocus(cameraTrack, waitMs=1200){
- if(!cameraTrack) return;
- try{
-  const caps=cameraTrack.getCapabilities?cameraTrack.getCapabilities():{};
-  const modes=caps.focusMode||[];
-  // Nejprve vyžádáme jednorázové přeostření, pokud ho zařízení nabízí.
-  if(modes.includes('single-shot')){
-   try{await cameraTrack.applyConstraints({advanced:[{focusMode:'single-shot'}]})}
-   catch(e){try{await cameraTrack.applyConstraints({focusMode:'single-shot'})}catch(x){}}
-   await new Promise(resolve=>setTimeout(resolve,900));
-  }
-  // Poté ponecháme průběžné automatické ostření.
-  if(modes.includes('continuous')){
-   try{await cameraTrack.applyConstraints({advanced:[{focusMode:'continuous'}]})}
-   catch(e){try{await cameraTrack.applyConstraints({focusMode:'continuous'})}catch(x){}}
-  }
-  const exposure=caps.exposureMode||[];
-  if(exposure.includes('continuous')){
-   try{await cameraTrack.applyConstraints({advanced:[{exposureMode:'continuous'}]})}
-   catch(e){try{await cameraTrack.applyConstraints({exposureMode:'continuous'})}catch(x){}}
-  }
-  if(waitMs>0) await new Promise(resolve=>setTimeout(resolve,waitMs));
- }catch(e){}
-}
-// ===== Tichá příprava kamery při spuštění aplikace =====
-let cameraWarmupPromise=null;
-async function warmupCameraOnStart(){
- try{
-  // Kameru na pozadí otevíráme pouze tehdy, pokud už uživatel oprávnění udělil.
-  if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||
-     !navigator.permissions||document.visibilityState!=='visible')return;
-  const permission=await navigator.permissions.query({name:'camera'});
-  if(permission.state!=='granted')return;
-  const base={width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}};
-  const get=c=>navigator.mediaDevices.getUserMedia({video:Object.assign({},base,c),audio:false});
-  let warmStream=null;
-  if(C.deviceId){
-   try{warmStream=await get({deviceId:{exact:C.deviceId}})}catch(e){}
-  }
-  if(!warmStream){
-   warmStream=await get({facingMode:{ideal:'environment'}});
-  }
-  const warmTrack=warmStream.getVideoTracks()[0];
-  if(warmTrack) await initializeCameraFocus(warmTrack,1500);
-  // Necháme kamerový modul dokončit inicializaci před uvolněním streamu.
-  await new Promise(resolve=>setTimeout(resolve,500));
-  warmStream.getTracks().forEach(t=>t.stop());
- }catch(e){}
-}
-async function camOn(){if(cameraWarmupPromise)await cameraWarmupPromise;camOff();try{
+async function camOn(){camOff();try{
  await getDet();
  {const o=await openCam();stream=o.s;if(o.fb)toast('Vybraná kamera není dostupná, tentokrát použita automatická volba')}
  track=stream.getVideoTracks()[0];wake();
+ try{
+  const caps=track.getCapabilities?track.getCapabilities():{};
+  if(caps.focusMode&&caps.focusMode.includes('continuous')){
+   try{await track.applyConstraints({focusMode:'continuous'})}catch(e){await track.applyConstraints({advanced:[{focusMode:'continuous'}]})}
+  }
+  if(caps.exposureMode&&caps.exposureMode.includes('continuous')){
+   try{await track.applyConstraints({exposureMode:'continuous'})}catch(e){}
+  }
+ }catch(e){}
  const vd=$('vid');vd.srcObject=stream;$('cw').style.display='block';await vd.play();$('cam').style.display='none';
- // Ostření nastavujeme až po spuštění živého obrazu, ne pouze při otevření streamu.
- await initializeCameraFocus(track,500);
  try{const cp=track.getCapabilities?track.getCapabilities():{};if(cp.torch&&$('tb'))$('tb').style.display='block';if(cp.zoom&&$('zm')){const z=$('zm');z.min=cp.zoom.min;z.max=Math.min(cp.zoom.max,5);z.step=cp.zoom.step||.1;z.value=Math.min(Math.max(C.zoom||1,cp.zoom.min),z.max);z.style.display='block';setZoom(z.value)}}catch(e){}
  const c=document.createElement('canvas'),x=c.getContext('2d',{willReadFrequently:true}),need=C.cf||1,say=m=>{const e=$('cst');if(e)e.textContent=m};
  cand='';candN=0;say('Hledám kód…');
@@ -955,9 +916,7 @@ window.addEventListener('beforeunload', e => {
  }
 });
 
-tagAuth();render();
-cameraWarmupPromise=warmupCameraOnStart();
-try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+tagAuth();render();try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 idbGet('file').then(x=>{if(x&&x.buf&&!D.length)load(x.buf,x.name)});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).catch(()=>{});
 </script></body></html>
