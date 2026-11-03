@@ -112,6 +112,19 @@ label.btn{line-height:calc(48px*var(--bs))}
 :root[data-uni="1"] input[type=checkbox]{accent-color:var(--ck)}
 .top{transition:transform .2s ease}.top.hid{transform:translateY(-120%)}
 .chips{display:flex;flex-wrap:wrap;overflow:visible;scroll-snap-type:none}
+.csel{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;cursor:pointer;margin-bottom:4px}
+.cs-t{flex:1;min-width:0;overflow:hidden;white-space:nowrap}
+.cs-tx{display:inline-block}
+.cs-tx.mq{animation:csmq 7s ease-in-out infinite alternate}
+@keyframes csmq{0%,18%{transform:translateX(0)}82%,100%{transform:translateX(var(--d))}}
+@media(prefers-reduced-motion:reduce){.cs-tx.mq{animation:none}}
+.cs-ar{flex:none;color:var(--mut)}
+.csp .sheet{max-width:420px;width:calc(100% - 32px);border-radius:12px;padding:8px 0;max-height:80%}
+.cst{padding:8px 16px 4px;color:var(--mut);font-size:14px}
+.copt{display:flex;align-items:center;gap:14px;width:100%;min-height:calc(52px*var(--bs));padding:8px 16px;border:0;background:transparent;color:var(--ink);font:inherit;font-size:max(16px,calc(16px*var(--fs)));text-align:left;white-space:normal;cursor:pointer}
+.copt:active{background:var(--bg)}
+.cdot{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--mut)}
+.copt[aria-selected=true] .cdot{border-color:var(--ck);background:radial-gradient(circle,var(--ck) 0 42%,transparent 46%)}
 .sws input{width:calc(27px*var(--bs));height:calc(27px*var(--bs))}
 .row{padding:calc(14px*var(--cs));margin-bottom:calc(10px*var(--cs));gap:calc(4px*var(--cs)) 12px;font-size:calc(16px*var(--fs)*var(--cs))}
 .row .idn{font-size:calc(22px*var(--fs)*var(--cs))}
@@ -505,8 +518,8 @@ let LK=null;
 document.addEventListener('pointerdown',e=>{LK=null;const el=e.target;if(!(el&&el.classList&&el.classList.contains('lk')))return;const r=el.getBoundingClientRect(),mn=+el.min,mx=+el.max,p=(el.value-mn)/(mx-mn),tx=r.left+10+p*(r.width-20);if(Math.abs(e.clientX-tx)>30)LK={el,val:el.value}},true);
 ['pointerup','pointercancel'].forEach(t=>document.addEventListener(t,()=>{LK=null},true));
 function lk(el){if(LK&&LK.el===el){el.value=LK.val;return true}return false}
-function setScale(k,val){C[k]=+val;const e=$('sv_'+k);if(e)e.textContent=Math.round(C[k]*100)+' %';applyCfg();saveC()}
-function resetScale(){C.fs=C.bs=C.cs=1;saveC();applyCfg();render()}
+function setScale(k,val){setTimeout(measureMq,80);C[k]=+val;const e=$('sv_'+k);if(e)e.textContent=Math.round(C[k]*100)+' %';applyCfg();saveC()}
+function resetScale(){setTimeout(measureMq,80);C.fs=C.bs=C.cs=1;saveC();applyCfg();render()}
 function setFm(f,el){const q=new Set(C.fm);el.checked?q.add(f):q.delete(f);if(!q.size){el.checked=true;toast('Musí zůstat zapnutý aspoň jeden typ kódu');return}C.fm=FMT.map(x=>x[0]).filter(x=>q.has(x));saveC()}
 function testBeep(){beep('ok');setTimeout(()=>beep('warn'),450)}
 function testSignals(){
@@ -613,7 +626,7 @@ function sheetScan(){const x=v.res,A=aimDims();let b;
  return '<div class="scrim" onclick="if(event.target===this)closeS()"><div class="sheet" role="dialog" aria-label="Skenování"><div class="hd"><h2>Skenování štítku</h2><button class="xb" onclick="closeS()" aria-label="Zavřít">✕</button></div><div class="cw" id="cw" onclick="focusTap()"><video id="vid" playsinline muted></video><div class="aim'+(A.m==='full'?' full':'')+'" id="aim" style="width:'+Math.round(A.ww*100)+'%;height:'+Math.round(A.hh*100)+'%"></div><button class="tb" id="tb" onclick="torch()">Svítilna</button></div><input id="zm" class="rg" type="range" style="display:none" oninput="setZoom(this.value)" aria-label="Zoom kamery"><button class="btn pri" id="cam" onclick="camOn()" style="display:none">Zkusit kameru znovu</button><p class="mut sm" id="cst"></p><p class="mut sm">Kamera čte kód sama. Drž telefon klidně a namiř červenou čáru na čárový kód. Začni asi z 15–25 cm; pokud je obraz rozmazaný, trochu telefon oddal a klepni na obraz pro nové zaostření. Posuvníkem přibližuj jen postupně. Když se kód nedaří, použij Vyfotit štítek.</p><input id="sn" class="in" inputmode="numeric" autocomplete="off" placeholder="Nebo zadej majetkové číslo" value="'+(x?esc(fmt(x.n)):'')+'" oninput="formatScanInput(this)" onkeydown="if(event.key===\'Enter\')doScan()">'+b+'</div></div>'}
 
 function render(){const p=v.tab==='sum'?pageSum():v.tab==='set'?pageSet():v.loc?pageLoc():pageHome();
- $('app').innerHTML=p+'<nav class="nav"><button class="'+(v.tab==='home'?'on':'')+'" onclick="tabHome()">INVENTURA</button><button class="'+(v.tab==='sum'?'on':'')+'" onclick="tabSum()">SOUHRN</button><button class="'+(v.tab==='set'?'on':'')+'" onclick="tabSet()" aria-label="Nastavení" title="Nastavení"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button><button onclick="quitApp()" aria-label="Ukončit aplikaci" title="Ukončit aplikaci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button></nav>'+(v.hist?sheetHist():v.it?sheetItem():v.sc?sheetScan():'')+(v.rs?sheetReset():'')+(v.nf?sheetNew():'');if(v.tab==='set')chkApk();loadPhotos()}
+ $('app').innerHTML=p+'<nav class="nav"><button class="'+(v.tab==='home'?'on':'')+'" onclick="tabHome()">INVENTURA</button><button class="'+(v.tab==='sum'?'on':'')+'" onclick="tabSum()">SOUHRN</button><button class="'+(v.tab==='set'?'on':'')+'" onclick="tabSet()" aria-label="Nastavení" title="Nastavení"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button><button onclick="quitApp()" aria-label="Ukončit aplikaci" title="Ukončit aplikaci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button></nav>'+(v.hist?sheetHist():v.it?sheetItem():v.sc?sheetScan():'')+(v.rs?sheetReset():'')+(v.nf?sheetNew():'');if(v.tab==='set'){chkApk();enhSel()}loadPhotos()}
 function go(l){v.tab='home';v.loc=l||null;v.f='';v.sf='';render();scrollTo(0,0)}
 function goAll(){v.tab='home';v.loc=ALL_LOC;v.f='';v.sf='';render();scrollTo(0,0)}
 let NB=false;const TST=[];
@@ -840,10 +853,37 @@ async function quitApp(){
  try{if(hasNat('closeApp')){Android.closeApp();return}}catch(e){}
  try{window.close()}catch(e){}
  setTimeout(()=>{quitting=false;toast(/iphone|ipad|ipod/i.test(navigator.userAgent)?'Aplikaci zavřeš přejetím od spodní hrany displeje nahoru':'Aplikaci zavřeš přepnutím aplikací a odsunutím této karty')},400)}
+// ===== Výběrová pole v nastavení: vlastní seznam s barvou vybrané volby a posunem dlouhého textu =====
+function selText(sel){const o=sel.options[sel.selectedIndex];return o?o.text:''}
+function measureMq(){document.querySelectorAll('#app .cs-tx').forEach(tx=>{const t=tx.parentElement;tx.classList.remove('mq');tx.style.removeProperty('--d');
+ const over=tx.scrollWidth-t.clientWidth;if(over>2){tx.style.setProperty('--d',(-over)+'px');tx.style.animationDuration=Math.max(5,over/20+3)+'s';tx.classList.add('mq')}})}
+window.addEventListener('resize',()=>{if(v.tab==='set')measureMq()});
+function enhSel(){
+ document.querySelectorAll('#app select.in').forEach(sel=>{
+  if(sel.dataset.enh)return;sel.dataset.enh='1';sel.style.display='none';
+  const b=document.createElement('button');b.type='button';b.className='in csel';b.setAttribute('aria-haspopup','listbox');
+  b.innerHTML='<span class="cs-t"><span class="cs-tx"></span></span><span class="cs-ar" aria-hidden="true">▾</span>';
+  const tx=b.querySelector('.cs-tx'),sync=()=>{const t=selText(sel);tx.textContent=t;b.title=t;b.setAttribute('aria-label',(lblOf(sel)?lblOf(sel)+': ':'')+t)};
+  b.sync=sync;sync();b.onclick=()=>openSel(sel,b);sel.after(b)});
+ requestAnimationFrame(measureMq)}
+function lblOf(sel){const l=sel.id?document.querySelector('label[for="'+sel.id+'"]'):null;return l?l.textContent.trim():''}
+function openSel(sel,btn){
+ const el=document.createElement('div');el.className='scrim csp';el.style.alignItems='center';el.style.zIndex=45;
+ const box=document.createElement('div');box.className='sheet';box.setAttribute('role','listbox');
+ const ttl=lblOf(sel);if(ttl){const h=document.createElement('div');h.className='cst';h.textContent=ttl;box.appendChild(h)}
+ let cur=null;
+ [...sel.options].forEach(o=>{const r=document.createElement('button');r.type='button';r.className='copt';r.setAttribute('role','option');
+  const on=o.value===sel.value;r.setAttribute('aria-selected',on?'true':'false');
+  r.innerHTML='<span class="cdot" aria-hidden="true"></span><span></span>';r.lastChild.textContent=o.text;if(on)cur=r;
+  r.onclick=()=>{el.remove();if(o.value!==sel.value){sel.value=o.value;sel.dispatchEvent(new Event('change',{bubbles:true}))}if(btn.sync){btn.sync();measureMq()}};
+  box.appendChild(r)});
+ el.appendChild(box);el.addEventListener('click',e=>{if(e.target===el)el.remove()});
+ el.addEventListener('keydown',e=>{if(e.key==='Escape')el.remove()});
+ document.body.appendChild(el);if(cur){cur.scrollIntoView({block:'center'});cur.focus()}}
 // ===== Tlačítko Zpět vždy vrací o krok a aplikaci nezavře =====
 function backStep(){
  const dlg=document.querySelector('body > .scrim');
- if(dlg){const b=dlg.querySelector('button');if(b)b.click();return}
+ if(dlg){if(dlg.classList.contains('csp')){dlg.remove();return}const b=dlg.querySelector('button');if(b)b.click();return}
  if(v.nf){nfCancel();return}
  if(v.hist||v.it||v.sc||v.rs){closeS();return}
  if(v.tab==='home'&&v.loc){go(null);return}
