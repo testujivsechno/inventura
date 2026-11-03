@@ -350,6 +350,27 @@ jobs:
           grep -q "android.permission.VIBRATE" "$MANIFEST" || { echo "CHYBA: oprávnění VIBRATE se nepodařilo doplnit."; exit 1; }
           cat "$MANIFEST"
 
+      - name: Odstranění zastaralé úpravy HTML v Gradle
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("android/app/build.gradle")
+          text = path.read_text(encoding="utf-8")
+
+          start_marker = "        // WebView nemá standardní stahování blob: URL."
+          end_marker = "        htmlFile.write(html, 'UTF-8')\n"
+
+          start = text.find(start_marker)
+          end = text.find(end_marker)
+          if start < 0 or end < 0 or end < start:
+              raise SystemExit("CHYBA: V build.gradle nebyla nalezena úprava HTML, kterou je třeba odstranit.")
+
+          text = text[:start] + text[end + len(end_marker):]
+          path.write_text(text, encoding="utf-8")
+          print("Úprava HTML v build.gradle odstraněna, ukládání a ukončení řeší přímo inventura.html.")
+          PY
+
       - name: Oprava motiv Android aplikace
         run: |
           sed -i 's|android:style/Theme.Material.DayNight.NoActionBar|@android:style/Theme.Material.NoActionBar|g' android/app/src/main/res/values/styles.xml
