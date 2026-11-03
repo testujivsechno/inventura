@@ -289,6 +289,67 @@ jobs:
           print("Oprava MainActivity dokončena.")
           PY
           
+      - name: Nativní ukládání souborů do složky Download
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("android/app/src/main/java/cz/inventura/app/MainActivity.java")
+          source = path.read_text()
+
+          if "saveFileTo" in source:
+              raise SystemExit("MainActivity už obsahuje saveFileTo.")
+
+          for imp in ("import android.content.ContentValues;", "import android.provider.MediaStore;"):
+              if imp not in source:
+                  source = source.replace("import android.content.Intent;", "import android.content.Intent;\n" + imp, 1)
+
+          marker = "        @JavascriptInterface public void saveFile(String name, String dataUrl) {"
+          if marker not in source:
+              raise SystemExit("CHYBA: Nepodařilo se najít metodu saveFile.")
+
+          method = r"""        // Uloží soubor přímo do složky (Android 10 a novější, bez oprávnění). Jinak otevře okno Uložit jako.
+                  @JavascriptInterface public String saveFileTo(String name, String dataUrl, String relPath) {
+                      try {
+                          String safeName = name == null ? "Inventura_export" : name.replaceAll("[/\\\\]", "_");
+                          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                              String encoded = dataUrl.substring(dataUrl.indexOf(',') + 1);
+                              byte[] bytes = Base64.decode(encoded, Base64.DEFAULT);
+                              String rel = (relPath == null || relPath.trim().isEmpty()) ? "Download/Inventura" : relPath.trim();
+                              ContentValues values = new ContentValues();
+                              values.put(MediaStore.MediaColumns.DISPLAY_NAME, safeName);
+                              values.put(MediaStore.MediaColumns.MIME_TYPE, mimeFor(safeName));
+                              values.put(MediaStore.MediaColumns.RELATIVE_PATH, rel);
+                              Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+                              if (uri == null) return "ERR";
+                              try (OutputStream out = getContentResolver().openOutputStream(uri)) {
+                                  if (out == null) return "ERR";
+                                  out.write(bytes);
+                              }
+                              return "OK:" + rel + "/" + safeName;
+                          }
+                          saveFile(name, dataUrl);
+                          return "PICKER";
+                      } catch (Exception e) {
+                          return "ERR";
+                      }
+                  }
+
+          """
+          source = source.replace(marker, method + marker, 1)
+          path.write_text(source)
+          print("Doplněno nativní ukládání do složky.")
+          PY
+
+      - name: Oprávnění pro vibrace
+        run: |
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          if ! grep -q "android.permission.VIBRATE" "$MANIFEST"; then
+            sed -i 's|<uses-permission android:name="android.permission.CAMERA" />|&\n    <uses-permission android:name="android.permission.VIBRATE" />|' "$MANIFEST"
+          fi
+          grep -q "android.permission.VIBRATE" "$MANIFEST" || { echo "CHYBA: oprávnění VIBRATE se nepodařilo doplnit."; exit 1; }
+          cat "$MANIFEST"
+
       - name: Oprava motiv Android aplikace
         run: |
           sed -i 's|android:style/Theme.Material.DayNight.NoActionBar|@android:style/Theme.Material.NoActionBar|g' android/app/src/main/res/values/styles.xml
