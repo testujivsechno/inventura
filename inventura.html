@@ -606,7 +606,7 @@ function installApp(){
  toast(/iphone|ipad|ipod/i.test(navigator.userAgent)?'V Safari klepni na Sdílet a Přidat na plochu':'V menu prohlížeče zvol Přidat na plochu nebo Nainstalovat aplikaci')}
 async function chkApk(){try{const r=await fetch('inventura.apk',{method:'HEAD',cache:'no-store'});if(r.ok&&!/html/i.test(r.headers.get('content-type')||'')){const a=$('apk');if(a)a.style.display='block'}}catch(e){}}
 const idbDel=async k=>{try{const d=await idb();await new Promise((ok,no)=>{const t=d.transaction('f','readwrite');t.objectStore('f').delete(k);t.oncomplete=ok;t.onerror=()=>no(t.error)})}catch(e){}};
-function photoKeys(x){if(Array.isArray(x&&x.phs)&&x.phs.length)return [...new Set(x.phs.map(String))];return x&&x.ph&&x.t?[String(x.t)]:[]}
+function photoKeys(x){const a=Array.isArray(x&&x.phs)?x.phs.map(String):[];if(x&&x.ph&&x.t&&!a.includes(String(x.t)))a.unshift(String(x.t));return [...new Set(a)]}
 function delXPhotos(x){for(const k of photoKeys(x))idbDel('ph'+k)}
 async function appendXPhoto(t,b){const x=S.x.find(y=>y.t===t);if(!x)return;const keys=photoKeys(x),key=String(t)+'_'+Date.now()+'_'+(keys.length+1)+'_'+Math.random().toString(36).slice(2,8);await idbSet('ph'+key,b);x.phs=[...new Set([...keys,key])];x.ph=1;save()}
 async function shrink(f){const b=await createImageBitmap(f),k=Math.min(1,1000/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);return await new Promise(ok=>c.toBlob(ok,'image/jpeg',.7))}
@@ -616,11 +616,11 @@ async function xPre(e){const f=e.target.files[0];e.target.value='';if(!f)return;
 // Vrací snímek, null při zrušení, false když kamera není dostupná (pak se nabídne výběr souboru).
 let shoot=null;
 function shootPhoto(){return new Promise(async res=>{
- camOff();let s=null,tr=null,done=false,pics=[];
+ camOff();const under=document.querySelector('#app > .scrim');if(under)under.style.visibility='hidden';let s=null,tr=null,done=false,pics=[];
  const el=document.createElement('div');el.className='scrim csp';el.style.alignItems='center';el.style.zIndex=50;
  el.innerHTML='<div class="sheet" role="dialog" aria-label="Foto přebytku" style="max-width:420px;width:calc(100% - 32px);border-radius:12px"><h2>Vyfoť nalezený majetek</h2><video playsinline muted autoplay style="display:block;width:100%;max-height:55vh;background:#000;border-radius:8px;object-fit:cover"></video><p class="mut sm" id="shm">Připrav kameru a vyfoť první snímek.</p><div class="two"><button class="btn" type="button">Zrušit</button><button class="btn pri" type="button" disabled>Vyfotit</button></div><button class="btn ok" type="button" disabled style="margin-top:10px">Hotovo</button></div>';
  const vid=el.querySelector('video'),bs=el.querySelectorAll('button'),msg=el.querySelector('#shm'),finish=bs[2];
- const close=r=>{if(done)return;done=true;shoot=null;try{s&&s.getTracks().forEach(t=>t.stop())}catch(e){}el.remove();res(r)};
+ const close=r=>{if(done)return;done=true;shoot=null;try{s&&s.getTracks().forEach(t=>t.stop())}catch(e){}el.remove();if(under)under.style.visibility='';res(r)};
  shoot={close};bs[0].onclick=()=>close(null);finish.onclick=()=>close(pics);el.addEventListener('click',e=>{if(e.target===el)close(null)});
  document.body.appendChild(el);
  try{if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw 0;
@@ -638,7 +638,7 @@ async function takeX(){const pics=await shootPhoto();if(pics===false){const i=$(
 async function takeXh(t){const pics=await shootPhoto();if(pics===false){const i=$('xf'+t);if(i)i.click();return}if(!pics)return;
  try{for(const b of pics)await appendXPhoto(t,await shrink(b));render();toast('Uloženo fotografií: '+pics.length)}catch(er){toast('Foto se nepodařilo zpracovat')}}
 async function xShot(e,t){const f=e.target.files[0];e.target.value='';if(!f)return;try{await appendXPhoto(t,await shrink(f));render();toast('Fotka uložena')}catch(er){toast('Foto se nepodařilo zpracovat')}}
-async function loadPhotos(){for(const im of document.querySelectorAll('img[data-ph]')){try{const b=await idbGet('ph'+im.dataset.ph);if(b){im.onload=()=>URL.revokeObjectURL(im.src);im.src=URL.createObjectURL(b)}else im.style.display='none'}catch(e){}}}
+async function loadPhotos(){const imgs=[...document.querySelectorAll('img[data-ph]')];if(!imgs.length)return;let d;try{d=await idb()}catch(e){imgs.forEach(im=>im.style.display='none');return}await Promise.all(imgs.map(im=>new Promise(done=>{try{const q=d.transaction('f','readonly').objectStore('f').get('ph'+im.dataset.ph);q.onsuccess=()=>{const b=q.result;if(b){const u=URL.createObjectURL(b);im.onload=()=>URL.revokeObjectURL(u);im.onerror=()=>{im.style.display='none';URL.revokeObjectURL(u)};im.src=u}else im.style.display='none';done()};q.onerror=()=>{im.style.display='none';done()}}catch(e){im.style.display='none';done()}})));try{d.close()}catch(e){}}
 function logPush(e){e.w=Date.now();(S.log=S.log||[]).push(e);if(S.log.length>60)S.log.shift()}
 function undoToast(m){const t=$('toast');t.innerHTML=esc(m)+' <button class="ub" onclick="undoLast()">Vrátit</button>';t.classList.add('on');t.classList.add('act');clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('on');t.classList.remove('act')},(+C.ut>0?+C.ut:6)*1000)}
 function undoAt(i){const e=(S.log||[])[i];if(!e)return;const sc=v.sc;
