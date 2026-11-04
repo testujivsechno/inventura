@@ -39,7 +39,7 @@ dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:10px 0}dt{col
 .three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
 .three .btn{padding-left:4px;padding-right:4px;font-size:14px;min-width:0}
 .vf{border:3px dashed var(--acc);border-radius:8px;padding:28px 12px;text-align:center;color:var(--mut);margin:10px 0}.warn{color:var(--bad);font-weight:600}
-.grid4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}.stat{background:var(--surf);border:1px solid var(--line);border-radius:8px;padding:10px 12px}.stat b{display:block;font-size:34px;line-height:1}
+.grid4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}.stat{background:var(--surf);border:1px solid var(--line);border-radius:8px;padding:10px 12px}.stat{font:inherit;color:var(--ink);text-align:left;cursor:pointer;width:100%}.stat.dim{opacity:.55;cursor:default}.stat:not(.dim):active{filter:brightness(1.25)}.stat b{display:block;font-size:34px;line-height:1}
 .scroll{overflow-x:auto;margin-bottom:14px}table{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line)}th{color:var(--mut);font-weight:600}
 .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 12px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:30;opacity:0;pointer-events:none;transition:opacity .15s;font-weight:600}.toast.on{opacity:1}
 :focus-visible{outline:3px solid var(--ink);outline-offset:2px}
@@ -112,6 +112,10 @@ label.btn{line-height:calc(48px*var(--bs))}
 :root[data-uni="1"] input[type=checkbox]{accent-color:var(--ck)}
 .top{transition:transform .2s ease}.top.hid{transform:translateY(-120%)}
 .chips{display:flex;flex-wrap:wrap;overflow:visible;scroll-snap-type:none}
+.fchips{gap:4px 6px;margin:4px 0 6px;padding-bottom:0}
+.fchips .chip{min-height:calc(28px*var(--bs));padding:0 9px;font-size:calc(12.5px*var(--fs));font-weight:500;line-height:1}
+.fchips .chip:not(.on){color:var(--mut)}
+.fchips .chip .cn{opacity:.7;font-weight:400;margin-left:2px}
 .csel{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left;cursor:pointer;margin-bottom:4px}
 .cs-t{flex:1;min-width:0;overflow:hidden;white-space:nowrap}
 .cs-tx{display:inline-block}
@@ -176,7 +180,7 @@ const idText=value=>{
 };
 const KEY='inv-v1';let S={r:{},x:[],who:''};try{S=Object.assign(S,JSON.parse(localStorage.getItem(KEY)))}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
-const CK='inv-cfg-v1';let C={snd:true,vib:true,fs:1,bs:1,cs:1,fm:['code_128','code_39','ean_13','ean_8','itf','codabar','qr_code'],ar:'band',cf:2,val:true,vol:.6,theme:'dark',accent:'daikin',uni:false,stick:true,dir:'Download/Inventura',wake:true,bkOn:true,bkN:20,bkM:60,auto:false,bkQuit:true,ut:6,cam:'m',group:4,showO:true,showAll:true,showB:false};try{C=Object.assign(C,JSON.parse(localStorage.getItem(CK)))}catch(e){}
+const CK='inv-cfg-v1';let C={snd:true,vib:true,fs:1,bs:1,cs:1,fm:['code_128','code_39','ean_13','ean_8','itf','codabar','qr_code'],ar:'band',cf:2,val:true,vol:.6,theme:'dark',accent:'daikin',uni:false,stick:true,zf:false,dir:'Download/Inventura',wake:true,bkOn:true,bkN:20,bkM:60,auto:false,bkQuit:true,ut:6,cam:'m',group:4,showO:true,showAll:true,showB:false};try{C=Object.assign(C,JSON.parse(localStorage.getItem(CK)))}catch(e){}
 for(const k of ['fs','bs','cs']){C[k]=Math.min(1.3,Math.max(.7,+C[k]||1))}
 if(!Array.isArray(C.fm)||!C.fm.length)C.fm=['code_128','code_39','ean_13','ean_8','itf','codabar','qr_code'];
 if(!Number.isInteger(+C.group)||+C.group<0||+C.group>12)C.group=4; C.group=+C.group;
@@ -421,18 +425,20 @@ const ju=u=>!u||/^pcs?$/i.test(u)?'ks':u;
 const noLab=d=>stat(d)==='f'&&!S.r[d.k].lab;
 const noInv=d=>stat(d)==='f'&&S.r[d.k].inv===false;
 const xs=()=>v.loc===ALL_LOC?S.x:S.x.filter(x=>x.g===v.by+v.loc);
-const stOk=d=>!v.sf||v.sf!=='x'&&(v.sf==='l'?!!noLab(d):v.sf==='k'?d.q>1:stat(d)===v.sf);
+const stOk=d=>!v.sf||v.sf!=='x'&&(v.sf==='l'?!!noLab(d):v.sf==='k'?d.q>1:v.sf==='c'?waiting(d):stat(d)===v.sf);
+function fcount(f){const L=inLoc(v.loc);return f==='x'?xs().length:L.filter(d=>f==='l'?!!noLab(d):f==='k'?d.q>1:f==='c'?waiting(d):f?stat(d)===f:true).length}
 function setSf(x){v.sf=x;render()}
-function chips(){const L=inLoc(v.loc),c=f=>f==='x'?xs().length:L.filter(d=>f==='l'?!!noLab(d):f==='k'?d.q>1:f?stat(d)===f:true).length;
- return '<div class="chips" role="group" aria-label="Zobrazit">'+[['','Vše'],['c','Zbývá'],['k','Vícepoložkové'],['p','Nedokončeno'],['f','Nalezeno'],['m','Nenalezeno'],['x','Přebytek'],['l','Bez štítku']].map(a=>!a?'<span class="br"></span>':'<button class="chip'+(v.sf===a[0]?' on':'')+'" onclick="setSf(\''+a[0]+'\')">'+a[1]+' '+c(a[0])+'</button>').join('')+'<button class="chip" onclick="openHist()">Historie</button></div>'}
+function chips(){const c=fcount;
+ return '<div class="chips fchips" role="group" aria-label="Zobrazit">'+[['','Vše'],['c','Zbývá'],['k','Vícepoložkové'],['p','Nedokončeno'],['f','Nalezeno'],['m','Nenalezeno'],['x','Přebytek'],['l','Bez štítku']].filter(a=>a[0]===''||C.zf||v.sf===a[0]||c(a[0])>0).map(a=>!a?'<span class="br"></span>':'<button class="chip'+(v.sf===a[0]?' on':'')+'" onclick="setSf(\''+a[0]+'\')">'+a[1]+' <span class="cn">'+c(a[0])+'</span></button>').join('')+'<button class="chip" onclick="openHist()">Historie</button></div>'}
 function rows(){if(v.sf==='x')return xs().length?'':'<p class="mut">Žádný přebytek v tomto zobrazení.</p>';const q=v.f.toLowerCase(),qc=q.replace(/\s/g,'');let L=inLoc(v.loc).filter(stOk);if(q)L=L.filter(d=>(d.id+' '+d.p+' '+d.d+' '+d.sn).toLowerCase().includes(q)||String(d.id).replace(/\s/g,'').includes(qc));const m=L.length;if(!m)return '<p class="mut">Žádné položky v tomto zobrazení.</p>';
  return L.slice(0,300).map(d=>{
   const nl=noLab(d), ni=noInv(d), sd=stat(d), sClass='';
   return '<button class="row '+sClass+'" onclick="openItem(\''+d.k+'\')"><span><span class="num idn">'+esc(fmt(d.id))+'</span> <span class="mut sm">Počet: <b>'+d.q+' '+esc(ju(d.ks))+'</b></span></span><span>'+pill(d)+(nl?' <span class="pill m">Štítek</span>':'')+(ni?' <span class="pill m">Inventura</span>':'')+(d.dc>1?' <span class="pill">Duplicita '+d.dn+'/'+d.dc+'</span>':'')+'</span><span class="span2">'+esc(d.p+(v.by==='o'?' · '+d.b:''))+'</span>'+(d.d&&d.d.toLowerCase()!==d.p.toLowerCase()?'<span class="span2 mut">'+esc(d.d)+'</span>':'')+'</button>';
  }).join('')+(m>300?'<p class="mut sm">Zobrazeno 300 z '+m+', zúž hledání.</p>':'')}
-function pageLoc(){const allMode=v.loc===ALL_LOC,X=allMode&&v.sf!=='x'?[]:xs(),n=done(v.loc),t=inLoc(v.loc).length;
+function pageLoc(){if(!C.zf&&v.sf&&fcount(v.sf)===0)v.sf='';
+ const allMode=v.loc===ALL_LOC,X=(v.sf==='x'||(v.sf===''&&!allMode))?xs():[],n=done(v.loc),t=inLoc(v.loc).length;
  return '<header class="top"><div class="ttl"><button class="back" onclick="go(null)">‹ Inventura</button><span class="mut sm">'+n+' z '+t+' položek</span></div><h1>'+esc(allMode?'Celý majetek':v.loc)+'</h1>'+bar(n,t)+'<input id="fl" class="in" placeholder="Hledat číslo, popis, sériové číslo" value="'+esc(v.f)+'" oninput="handleSearchInput(this.value)">'+chips()+'</header><div id="lst">'+rows()+'</div>'+
- X.map(x=>'<div class="row"><span class="num idn">'+esc(fmt(x.n))+'</span><span class="pill x">Přebytek</span><span class="span2">'+esc(x.p||'Bez popisu')+'</span>'+(x.t?(x.ph?'<img class="th span2" data-ph="'+x.t+'" alt="Fotka přebytku" onclick="this.classList.toggle(\'big\')">':'')+'<span class="span2"><label class="chip" for="xf'+x.t+'">'+(x.ph?'Změnit fotku':'Přidat fotku')+'</label><input id="xf'+x.t+'" type="file" accept="image/*" capture="environment" hidden onchange="xShot(event,'+x.t+')"></span>':'')+'</div>').join('')+'<button class="btn pri fab" onclick="openScan()">Skenovat štítek</button>'}
+ X.map(x=>'<div class="row"><span class="num idn">'+esc(fmt(x.n))+'</span><span class="pill x">Přebytek</span><span class="span2">'+esc(x.p||'Bez popisu')+'</span>'+(x.t?(x.ph?'<img class="th span2" data-ph="'+x.t+'" alt="Fotka přebytku" onclick="this.classList.toggle(\'big\')">':'')+'<span class="span2"><button type="button" class="chip" onclick="takeXh('+x.t+')">'+(x.ph?'Změnit fotku':'Přidat fotku')+'</button><input id="xf'+x.t+'" type="file" accept="image/*" capture="environment" hidden onchange="xShot(event,'+x.t+')"></span>':'')+'</div>').join('')+'<button class="btn pri fab" onclick="openScan()">Skenovat štítek</button>'}
 
 // Debounce pro vyhledávání (200 ms zpoždění pro plynulost na mobilu)
 let searchDebounceTimer;
@@ -454,6 +460,10 @@ function handleSearchInput(val){
 }
 
 function setSn(x){v.sn=x;render()}
+// Klepnutí na dlaždici v Souhrnu: přepne na Inventuru s příslušným filtrem (u vybrané osoby jen její položky)
+function sumGo(f){
+ if(v.sn){v.by='o';S.by='o';save();v.loc=v.sn}else v.loc=ALL_LOC;
+ navTab('home');v.tab='home';v.sf=f;v.f='';render();scrollTo(0,0)}
 function pageSum(){
  const P=[...new Set(D.map(d=>d.o))].sort();if(v.sn&&!P.includes(v.sn))v.sn='';
  const L=v.sn?D.filter(d=>d.o===v.sn):D,
@@ -461,7 +471,7 @@ function pageSum(){
   px=v.sn?S.x.filter(x=>x.g==='o'+v.sn).length:S.x.length;
  return '<header class="top"><h1>SOUHRN</h1></header>'+confl()+
  (D.length?'<label class="mut sm" for="psn">Filtrovat souhrn podle osoby z evidence:</label><select id="psn" class="in" onchange="setSn(this.value)"><option value="">Všechny osoby</option>'+P.map(p=>'<option value="'+esc(p)+'"'+(p===v.sn?' selected':'')+'>'+esc(p)+'</option>').join('')+'</select>':'')+
- '<div class="grid4">'+[['Položek celkem',L.length],['Zbývá',c('c')],['Nalezeno',c('f')],['Nenalezeno',c('m')],['Přebytek',px],['Bez štítku',c('l')]].map(a=>'<div class="stat"><b class="num">'+a[1]+'</b>'+a[0]+'</div>').join('')+'</div>'+
+ '<div class="grid4">'+[['Položek celkem',L.length,''],['Zbývá',c('c'),'c'],['Nalezeno',c('f'),'f'],['Nenalezeno',c('m'),'m'],['Přebytek',px,'x'],['Bez štítku',c('l'),'l']].map(a=>a[1]>0?'<button type="button" class="stat" onclick="sumGo(\''+a[2]+'\')"><b class="num">'+a[1]+'</b>'+a[0]+'</button>':'<div class="stat dim"><b class="num">'+a[1]+'</b>'+a[0]+'</div>').join('')+'</div>'+
  (D.length?(v.sn?'<p class="mut sm">Přebytek = zapsaný při práci ve skupině této osoby (režim Podle osob).</p>':'')+'<label class="mut sm" for="who">Kdo provádí inventuru (zapíše se do sloupce Inventuru provedl):</label><input id="who" class="in" placeholder="Tvoje jméno" value="'+esc(S.who)+'" oninput="S.who=this.value;save()"><button class="btn pri" onclick="exp(\'mine\')">Exportovat jen moje změny (xlsx)</button><button class="btn" style="margin-top:10px" onclick="exp(\'all\')">Exportovat vše sloučené (xlsx)</button><label class="btn" style="margin-top:10px" for="fi2">Načíst jiný soubor</label><input id="fi2" type="file" accept=".xlsx,.xlsm" hidden onchange="pick(event)"><p class="mut sm">Jen moje změny zapíše pouze řádky a přebytky, které zapsalo jméno uvedené výše, a nepřepíše řádky, které už vyplnil někdo jiný. Vše sloučené zapíše výsledky všech lidí ze sloučených záloh, každý řádek se jménem a datem jeho autora. Položky s nevyřešeným konfliktem se vždy přeskočí. Přebytky jdou na list Prebytky, duplicitní čísla (jen u Vše sloučené) na list Duplicity. Načtení jiného souboru nahradí seznam položek. Pokud k němu uložené výsledky nesedí, aplikace se zeptá, co s nimi.</p><h2>Záloha výsledků</h2><p class="mut sm">'+bkInfo()+' Zálohu lze načíst do jiného telefonu a výsledky se sloučí (stejnou položku zapsanou stejným člověkem nahradí novější záznam, odlišné zápisy různých lidí aplikace nepřepíše a nabídne je k rozhodnutí v Souhrnu).</p><button class="btn" onclick="backup()">Uložit zálohu (JSON)</button><label class="btn" for="rf">Načíst nebo sloučit zálohu</label><input id="rf" type="file" accept=".json,application/json" hidden onchange="restore(event)">':'<p class="mut">Nejdřív načti soubor na kartě Inventura.</p>')+'<button class="btn" style="margin-top:10px" onclick="openHist()">Poslední zápisy a vrácení</button><button class="btn" style="margin-top:10px" onclick="reset()">Smazat výsledky</button>'}
 
 let camAuto=false,cameraOptions=[],cameraTestInfo='Kamery ještě nebyly otestovány.';
@@ -552,6 +562,7 @@ function pageSet(){
   '<label class="mut sm" for="acc">Barva tlačítek a zvýraznění</label><select id="acc" class="in" onchange="setAccent(this.value)">'+Object.keys(ACC).map(k=>'<option value="'+k+'"'+(C.accent===k?' selected':'')+'>'+ACC[k][0]+'</option>').join('')+'</select>'+
   '<label class="sw sws"><span>Sjednotit barvu zaškrtávátek a ukazatelů průběhu s barvou tlačítek</span><input type="checkbox"'+(C.uni?' checked':'')+' onchange="setUni(this.checked)"></label>'+
   '<label class="sw sws"><span>Ukotvit vyhledávací pole a filtry<br><span class="mut sm">Když je vypnuto, při posouvání dolů zmizí a při posunu zpět se zobrazí.</span></span><input type="checkbox"'+(C.stick!==false?' checked':'')+' onchange="setC(\'stick\',this.checked)"></label>'+
+  '<label class="sw sws"><span>Zobrazit tlačítka filtrů s počtem 0<br><span class="mut sm">Vypnuto: filtry bez položek se skryjí. Historie je vidět vždy.</span></span><input type="checkbox"'+(C.zf?' checked':'')+' onchange="setC(\'zf\',this.checked)"></label>'+
   H3('Majetkové číslo')+'<label class="mut sm" for="grp">Vložit mezeru po každých X číslicích (jen na displeji)</label><select id="grp" class="in" onchange="setC(\'group\',+this.value);render()">'+op('group',[[0,'Bez mezer'],[3,'3 číslice'],[4,'4 číslice'],[5,'5 číslic'],[6,'6 číslic'],[7,'7 číslic'],[8,'8 číslic']])+'</select><p class="mut sm">Mezery slouží pouze pro přehledné zobrazení a zadávání. Do Excelu se majetkové číslo exportuje bez mezer.</p>'+
   H3('Velikost zobrazení')+'<p class="mut sm">Změna se projeví hned. 100 % je výchozí velikost. Posuvník se mění jen tažením za tečku, klepnutí na lištu nic nezmění.</p>'+sl('fs','Písmo')+sl('bs','Tlačítka a ovládací prvky')+sl('cs','Karty')+
   H3('Ukázka')+'<div class="row" style="cursor:default"><span><span class="num idn">'+esc(fmt('1234567890'))+'</span> <span class="mut sm">Počet: <b>1 ks</b></span></span><span></span><span class="span2">Ukázková karta položky</span></div><button class="btn" style="margin-bottom:10px">Ukázkové tlačítko</button><button class="btn" onclick="resetScale()">Obnovit výchozí velikosti</button>';
@@ -582,6 +593,28 @@ async function chkApk(){try{const r=await fetch('inventura.apk',{method:'HEAD',c
 const idbDel=async k=>{try{const d=await idb();await new Promise((ok,no)=>{const t=d.transaction('f','readwrite');t.objectStore('f').delete(k);t.oncomplete=ok;t.onerror=()=>no(t.error)})}catch(e){}};
 async function shrink(f){const b=await createImageBitmap(f),k=Math.min(1,1000/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);return await new Promise(ok=>c.toBlob(ok,'image/jpeg',.7))}
 async function xPre(e){const f=e.target.files[0];e.target.value='';if(!f)return;try{v.xph=await shrink(f);const im=$('xpv');if(im){im.src=URL.createObjectURL(v.xph);im.style.display='block'}}catch(er){toast('Foto se nepodařilo zpracovat')}}
+// Foto přímo v aplikaci: systémový výběr souboru v APK fotoaparát neotevře, proto se použije stejná kamera jako pro skenování.
+// Vrací snímek, null při zrušení, false když kamera není dostupná (pak se nabídne výběr souboru).
+let shoot=null;
+function shootPhoto(){return new Promise(async res=>{
+ camOff();let s=null,tr=null,done=false;
+ const el=document.createElement('div');el.className='scrim csp';el.style.alignItems='center';el.style.zIndex=50;
+ el.innerHTML='<div class="sheet" role="dialog" aria-label="Foto" style="max-width:420px;width:calc(100% - 32px);border-radius:12px"><h2>Vyfoť majetek</h2><video playsinline muted autoplay style="width:100%;max-height:55vh;background:#000;border-radius:8px"></video><p class="mut sm" id="shm"></p><div class="two"><button class="btn" type="button">Zrušit</button><button class="btn pri" type="button" disabled>Vyfotit</button></div></div>';
+ const vid=el.querySelector('video'),bs=el.querySelectorAll('button'),msg=el.querySelector('#shm');
+ const close=r=>{if(done)return;done=true;shoot=null;try{s&&s.getTracks().forEach(t=>t.stop())}catch(e){}el.remove();res(r)};
+ shoot={close};bs[0].onclick=()=>close(null);el.addEventListener('click',e=>{if(e.target===el)close(null)});
+ document.body.appendChild(el);
+ try{if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw 0;
+  const o=await openCam();s=o.s;if(done){s.getTracks().forEach(t=>t.stop());return}
+  tr=s.getVideoTracks()[0];vid.srcObject=s;await vid.play();bs[1].disabled=false}catch(e){close(false);return}
+ bs[1].onclick=async()=>{bs[1].disabled=true;msg.textContent='Fotím…';let blob=null;
+  try{if(window.ImageCapture&&tr)blob=await new ImageCapture(tr).takePhoto()}catch(e){}
+  if(!blob){try{const c=document.createElement('canvas');c.width=vid.videoWidth;c.height=vid.videoHeight;c.getContext('2d').drawImage(vid,0,0);blob=await new Promise(ok=>c.toBlob(ok,'image/jpeg',.9))}catch(e){}}
+  close(blob||false)}})}
+async function takeX(){const b=await shootPhoto();if(b===false){const i=$('xph');if(i)i.click();return}if(!b)return;
+ try{v.xph=await shrink(b);const im=$('xpv');if(im){im.src=URL.createObjectURL(v.xph);im.style.display='block'}}catch(er){toast('Foto se nepodařilo zpracovat')}}
+async function takeXh(t){const b=await shootPhoto();if(b===false){const i=$('xf'+t);if(i)i.click();return}if(!b)return;
+ try{const c=await shrink(b);await idbSet('ph'+t,c);const x=S.x.find(y=>y.t===t);if(x){x.ph=1;save()}render();toast('Fotka uložena')}catch(er){toast('Foto se nepodařilo zpracovat')}}
 async function xShot(e,t){const f=e.target.files[0];e.target.value='';if(!f)return;try{const b=await shrink(f);await idbSet('ph'+t,b);const x=S.x.find(y=>y.t===t);if(x){x.ph=1;save()}render();toast('Fotka uložena')}catch(er){toast('Foto se nepodařilo zpracovat')}}
 async function loadPhotos(){for(const im of document.querySelectorAll('img[data-ph]')){try{const b=await idbGet('ph'+im.dataset.ph);if(b){im.onload=()=>URL.revokeObjectURL(im.src);im.src=URL.createObjectURL(b)}else im.style.display='none'}catch(e){}}}
 function logPush(e){e.w=Date.now();(S.log=S.log||[]).push(e);if(S.log.length>60)S.log.shift()}
@@ -622,7 +655,7 @@ function sheetScan(){const x=v.res,A=aimDims();let b;
   if(mm.length)b='<p class="warn">Štítek '+esc(fmt(x.n))+' byl dříve označen jako Nenalezeno.</p><p class="mut sm">Majetek se teď našel. Otevři záznam a změň ho na Nalezeno.</p>'+mm.map(d=>{const r=S.r[d.k];return pickRow(d)+'<p class="mut sm">Nenalezeno '+esc(new Date(r.t||0).toLocaleString('cs-CZ'))+(r.by?', '+esc(r.by):'')+(r.nt?': '+esc(r.nt):'')+'</p>'}).join('')+(ok?'<p class="mut sm">Jiný kus se stejným štítkem je už zaznamenaný. Pokud jde o další fyzický kus, zapiš ho jako přebytek.</p><button class="btn" onclick="addDup()">Zapsat další kus jako přebytek</button>':'')+'<button class="btn pri" style="margin-top:10px" onclick="rescan()">Skenovat dál</button>';
   else b='<p class="warn">Štítek '+esc(fmt(x.n))+' už je zaznamenaný.</p><p class="mut sm">Pokud jde o další fyzický kus se stejným štítkem, zapiš ho jako přebytek. Jinak záznam otevři a uprav, nebo skenuj dál.</p>'+x.dup.map(pickRow).join('')+'<button class="btn" onclick="addDup()">Zapsat další kus jako přebytek</button><button class="btn pri" style="margin-top:10px" onclick="rescan()">Skenovat dál</button>';}
  else if(x.o)b='<p class="warn">Číslo patří do: '+esc(x.o[v.by])+': '+esc(x.o.p)+'</p><button class="btn" onclick="openItem(\''+x.o.k+'\',true)">Otevřít přesto</button>';
- else b='<p class="warn">Číslo není v evidenci.</p>'+(x.xd?'<p class="mut sm">Tento přebytek už je zapsaný. Zapsáním přidáš další kus.</p>':'')+'<input id="xp" class="in" placeholder="Popis nalezeného majetku"><label class="btn" for="xph" style="margin:0 0 10px">Vyfotit nalezený majetek</label><input id="xph" type="file" accept="image/*" capture="environment" hidden onchange="xPre(event)"><img id="xpv" class="th" style="display:none;margin:0 0 10px" alt="Náhled fotky"><button class="btn ok" onclick="addX()">Zapsat přebytek</button><button class="btn" style="margin-top:10px" onclick="rescan()">Skenovat dál</button>';
+ else b='<p class="warn">Číslo není v evidenci.</p>'+(x.xd?'<p class="mut sm">Tento přebytek už je zapsaný. Zapsáním přidáš další kus.</p>':'')+'<input id="xp" class="in" placeholder="Popis nalezeného majetku"><button type="button" class="btn" style="margin:0 0 10px" onclick="takeX()">Vyfotit nalezený majetek</button><input id="xph" type="file" accept="image/*" capture="environment" hidden onchange="xPre(event)"><img id="xpv" class="th" style="display:none;margin:0 0 10px" alt="Náhled fotky"><button class="btn ok" onclick="addX()">Zapsat přebytek</button><button class="btn" style="margin-top:10px" onclick="rescan()">Skenovat dál</button>';
  return '<div class="scrim" onclick="if(event.target===this)closeS()"><div class="sheet" role="dialog" aria-label="Skenování"><div class="hd"><h2>Skenování štítku</h2><button class="xb" onclick="closeS()" aria-label="Zavřít">✕</button></div><div class="cw" id="cw" onclick="focusTap()"><video id="vid" playsinline muted></video><div class="aim'+(A.m==='full'?' full':'')+'" id="aim" style="width:'+Math.round(A.ww*100)+'%;height:'+Math.round(A.hh*100)+'%"></div><button class="tb" id="tb" onclick="torch()">Svítilna</button></div><input id="zm" class="rg" type="range" style="display:none" oninput="setZoom(this.value)" aria-label="Zoom kamery"><button class="btn pri" id="cam" onclick="camOn()" style="display:none">Zkusit kameru znovu</button><p class="mut sm" id="cst"></p><p class="mut sm">Kamera čte kód sama. Drž telefon klidně a namiř červenou čáru na čárový kód. Začni asi z 15–25 cm; pokud je obraz rozmazaný, trochu telefon oddal a klepni na obraz pro nové zaostření. Posuvníkem přibližuj jen postupně. Když se kód nedaří, použij Vyfotit štítek.</p><input id="sn" class="in" inputmode="numeric" autocomplete="off" placeholder="Nebo zadej majetkové číslo" value="'+(x?esc(fmt(x.n)):'')+'" oninput="formatScanInput(this)" onkeydown="if(event.key===\'Enter\')doScan()">'+b+'</div></div>'}
 
 function render(){const p=v.tab==='sum'?pageSum():v.tab==='set'?pageSet():v.loc?pageLoc():pageHome();
@@ -886,6 +919,7 @@ function openSel(sel,btn){
  document.body.appendChild(el);if(cur){cur.scrollIntoView({block:'center'});cur.focus()}}
 // ===== Tlačítko Zpět vždy vrací o krok a aplikaci nezavře =====
 function backStep(){
+ if(shoot){shoot.close(null);return}
  const dlg=document.querySelector('body > .scrim');
  if(dlg){if(dlg.classList.contains('csp')){dlg.remove();return}const b=dlg.querySelector('button');if(b)b.click();return}
  if(v.nf){nfCancel();return}
