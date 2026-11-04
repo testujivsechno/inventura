@@ -592,8 +592,8 @@ function pageSet(){
   H2('Skener')+skener+
   H2('Záloha')+zaloha+
   H2('Hlavní obrazovka')+'<p class="mut sm">Které volby se zobrazí nahoře na hlavní obrazovce Inventura. Aspoň jedna musí zůstat zapnutá.</p>'+vw('showO','Podle osob')+vw('showAll','Vše')+vw('showB','Podle budov')+
-  H2('Vzhled')+vzhled+
   H2('Vrácení zápisu')+vraceni+
+  H2('Vzhled')+vzhled+
   H2('Zvuk a vibrace')+tg('snd','Zvukové signály')+tg('vib','Vibrace')+zvuk+'<p class="mut sm">Vibrace nepodporuje Safari na iPhonu, tam fungují jen zvuky. Pokud je ticho, zkontroluj hlasitost médií a na iPhonu přepínač tichého režimu.</p><button class="btn" onclick="testSignals()">Vyzkoušet signály</button>';
  // Každá sekce je v samostatném podbarveném rámečku
  return '<header class="top"><h1>NASTAVENÍ</h1></header>'+body.split('<h2 class="sec').map((p,i)=>i?'<section class="ss"><h2 class="sec'+p+'</section>':p).join('')}
