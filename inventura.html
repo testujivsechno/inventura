@@ -512,7 +512,7 @@ function cameraErrorText(e){
 }
 function setC(k,val){C[k]=val;saveC()}
 function setCam(x){C.cam=x;saveC();applyCfg()}
-function setCameraDevice(x){const o=cameraOptions.find(d=>d.id===x);C.deviceId=x||'';C.deviceLabel=x&&o?o.lab||'':'';saveC();cameraTestInfo=x?'Vybraná kamera uložena.':'Kamera se bude vybírat automaticky.'}
+function setCameraDevice(x){const o=cameraOptions.find(d=>d.id===x);C.deviceId=x||'';C.deviceLabel=x&&o?o.lab||'':'';saveC();cameraTestInfo=x?'Vybraná kamera uložena.':'Při příštím spuštění se použije výchozí zadní kamera a její ID se uloží.'}
 async function testCameras(){
  const rr=()=>{if(v.tab==='set'&&!v.sc)render()};
  if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){cameraTestInfo=cameraErrorText({name:'SecurityError'});rr();return}
@@ -565,7 +565,7 @@ function pageSet(){
  const camList=cameraOptions.slice();
  if(C.deviceId&&!camList.some(d=>d.id===C.deviceId))camList.unshift({id:C.deviceId,label:C.deviceLabel||'Dříve vybraná kamera',info:'uložená volba'});
  const fmts=FMT.map(f=>'<label class="sw sws"><span>'+f[1]+'</span><input type="checkbox"'+(C.fm.includes(f[0])?' checked':'')+' onchange="setFm(\''+f[0]+'\',this)"></label>').join('');
- const kamera='<p class="mut sm">Automatický výběr kamery je doporučený. Vlastní kameru zvol jen když ten automatický vybere špatný objektiv.</p><button class="btn" onclick="testCameras()">Otestovat dostupné kamery</button><label class="mut sm" for="camdev">Typ kamery</label><select id="camdev" class="in" onchange="setCameraDevice(this.value)"><option value=""'+(!C.deviceId?' selected':'')+'>Automaticky (doporučeno)</option>'+camList.map(d=>'<option value="'+esc(d.id)+'"'+(C.deviceId===d.id?' selected':'')+'>'+esc(d.label+' — '+d.info)+'</option>').join('')+'</select><p class="mut sm">'+esc(cameraTestInfo)+'</p>'+
+ const kamera='<p class="mut sm">Při prvním spuštění se použije výchozí zadní kamera telefonu a její ID se uloží. Při dalších spuštěních se používá stále stejná kamera. Pokud už není dostupná, aplikace zobrazí chybu a sama nepřepne na jiný objektiv. Jinou kameru můžeš vybrat ručně níže.</p><button class="btn" onclick="testCameras()">Načíst dostupné kamery</button><label class="mut sm" for="camdev">Používaná kamera</label><select id="camdev" class="in" onchange="setCameraDevice(this.value)"><option value=""'+(!C.deviceId?' selected':'')+'>Výchozí zadní kamera při prvním spuštění</option>'+camList.map(d=>'<option value="'+esc(d.id)+'"'+(C.deviceId===d.id?' selected':'')+'>'+esc(d.label+' — '+d.info)+'</option>').join('')+'</select><p class="mut sm">'+esc(cameraTestInfo)+'</p>'+
   '<label class="mut sm" for="cam2">Velikost okna kamery</label><select id="cam2" class="in" onchange="setCam(this.value)">'+op('cam',[['s','Malé'],['m','Střední'],['l','Velké (až přes půl displeje)']])+'</select>'+
   '<label class="mut sm" for="car">Oblast čtení</label><select id="car" class="in" onchange="setC(\'ar\',this.value)">'+op('ar',[['band','Široké pásmo u čáry (doporučeno)'],['narrow','Užší pruh u čáry'],['full','Celé okno kamery']])+'</select><p class="mut sm">Čte se jen z oblasti v rámečku, takže se nechytají sousední štítky. Při zapnutém samotném QR nebo Data Matrix se čte celý záběr.</p>';
  const skener='<label class="mut sm" for="ccf">Potvrzení čtení</label><select id="ccf" class="in" onchange="setC(\'cf\',+this.value)">'+op('cf',[[1,'1× (nejrychlejší)'],[2,'2× shodně za sebou (doporučeno)'],[3,'3× shodně za sebou (nejpřesnější)']])+'</select><p class="mut sm">Kód se přijme, až když ho kamera přečte vícekrát stejně. Odstraní to chybná čtení.</p>'+
@@ -706,10 +706,7 @@ function tabSet(){
   v.tab='set';
   render();
   scrollTo(0,0);
-  if(!cameraOptions.length&&!camAuto){
-    camAuto=true;
-    setTimeout(testCameras,100);
-  }
+  // Seznam kamer načítáme jen po výslovném klepnutí uživatele; při otevření Nastavení se kamera nespouští.
 }
 function closeS(){camOff();v.hist=false;v.xph=null;v.xphs=[];v.rs=false;v.it=null;v.sc=false;v.res=null;render()}
 function openItem(k,fs){camOff();v.hist=false;v.sc=false;v.res=null;v.fs=!!fs;v.it=k;const d=D.find(x=>x.k===k),r0=S.r[k],r=r0&&r0.s==='m'?null:r0;v.q=Math.min(d.q,r&&r.q!=null?r.q:d.q);
@@ -833,25 +830,21 @@ function unwake(){const l=wl;wl=null;try{l&&l.release()}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&stream)wake()});
 async function openCam(){
  const base={width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:30,max:30}};
- const get=c=>navigator.mediaDevices.getUserMedia({video:Object.assign({},base,c),audio:false});
- const auto=()=>get({facingMode:{ideal:'environment'}});
- if(!C.deviceId)return {s:await auto()};
- try{return {s:await get({deviceId:{exact:C.deviceId}})}}catch(e){}
- // Uložené ID po novém spuštění neplatí (Android ho mohl změnit). Na chvíli se otevře automatická kamera, aby šly zjistit názvy, hned se zavře
- // a uložená kamera se otevře podle názvu. Dvě kamery najednou většina telefonů neotevře, proto se první musí zavřít.
- let m=null;
- try{
-  const t=await auto();t.getTracks().forEach(x=>x.stop());
-  const ds=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
-  m=C.deviceLabel&&ds.find(d=>d.label===C.deviceLabel)||null;
-  await new Promise(r=>setTimeout(r,200));
- }catch(e){}
- if(m){try{const s2=await get({deviceId:{exact:m.deviceId}});C.deviceId=m.deviceId;saveC();return {s:s2}}catch(e){}}
- return {s:await auto(),fb:true};
+ const video=C.deviceId
+  ?Object.assign({},base,{deviceId:{exact:C.deviceId}})
+  :Object.assign({},base,{facingMode:{ideal:'environment'}});
+ const s=await navigator.mediaDevices.getUserMedia({video,audio:false});
+ // Při prvním spuštění si zapamatuj přesně tu kameru, kterou prohlížeč skutečně otevřel.
+ // Při dalších spuštěních se používá výhradně toto ID; žádné automatické přepínání ani náhradní kamera.
+ if(!C.deviceId){
+  const tr=s.getVideoTracks()[0],st=tr&&tr.getSettings?tr.getSettings():{};
+  if(st.deviceId){C.deviceId=st.deviceId;C.deviceLabel=tr.label||'';saveC()}
+ }
+ return {s};
 }
 async function camOn(){camOff();try{
  await getDet();
- {const o=await openCam();stream=o.s;if(o.fb)toast('Vybraná kamera není dostupná, tentokrát použita automatická volba')}
+ {const o=await openCam();stream=o.s}
  track=stream.getVideoTracks()[0];wake();
  try{
   const caps=track.getCapabilities?track.getCapabilities():{};
