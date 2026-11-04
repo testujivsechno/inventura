@@ -516,7 +516,10 @@ function cameraErrorText(e){
 function setC(k,val){C[k]=val;saveC()}
 function setCam(x){C.cam=x;saveC();applyCfg()}
 function setCameraDevice(x){const o=cameraOptions.find(d=>d.id===x);C.deviceId=x||'';C.deviceLabel=x&&o?o.lab||'':'';saveC();cameraTestInfo=x?'Vybraná kamera uložena.':'Kamera se bude vybírat automaticky.'}
-async function testCameras(){
+// Test kamer nesmí běžet dvakrát najednou (dva běhy sdílejí seznam a vznikaly duplicitní kamery)
+let camBusy=false;
+async function testCameras(){if(camBusy)return;camBusy=true;try{await testCamerasRun()}finally{camBusy=false}}
+async function testCamerasRun(){
  const rr=()=>{if(v.tab==='set'&&!v.sc)render()};
  if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){cameraTestInfo=cameraErrorText({name:'SecurityError'});rr();return}
  cameraTestInfo='Žádám o povolení kamery…';rr();let perm;
@@ -876,7 +879,7 @@ async function openCam(){
 // Při prvním spuštění skeneru s automatickou kamerou jednou nabídne ruční výběr kamery
 function camFirstAsk(){if(C.deviceId||C.camAsk)return;C.camAsk=1;saveC();
  setTimeout(async()=>{if(!stream||!v.sc)return;
-  if(await askQ('Vybrat kameru?\n\nTelefon má víc kamer a automatický výběr nemusí zvolit tu nejpřesnější pro čárové kódy. Chceš si kameru vybrat teď? Půjde to i později v Nastavení.','Vybrat kameru','Později')){closeS();tabSet();setTimeout(testCameras,200)}},900)}
+  if(await askQ('Vybrat kameru?\n\nTelefon má víc kamer a automatický výběr nemusí zvolit tu nejpřesnější pro čárové kódy. Chceš si kameru vybrat teď? Půjde to i později v Nastavení.','Vybrat kameru','Později')){closeS();tabSet()}},900)}
 async function camOn(){camOff();try{
  await getDet();
  {const o=await openCam();stream=o.s;if(o.fb)toast('Vybraná kamera není dostupná, tentokrát použita automatická volba')}
