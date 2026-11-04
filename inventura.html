@@ -763,9 +763,9 @@ function doScan(){
 function addExtra(){const d=D.find(x=>x.k===v.it);if(!d)return;const t=Date.now(),p='Kus navíc: '+d.p;S.x.push({n:d.id,p,l:v.by==='b'?v.loc:'',g:v.by+v.loc,t,by:S.who||''});logPush({kind:'x',xt:t,id:d.id,p});save();beep('ok');toast('Kus navíc zapsán jako Přebytek: '+fmt(d.id))}
 function addDup(){const d=v.res.dup.find(z=>!(S.r[z.k]&&S.r[z.k].s==='m'))||v.res.dup[0],t=Date.now();S.x.push({n:d.id,p:'Duplicita: '+d.p,l:v.by==='b'?v.loc:'',g:v.by+v.loc,t,by:S.who||''});logPush({kind:'x',xt:t,id:d.id,p:'Duplicita: '+d.p});save();closeS();undoToast('Další kus zapsán jako přebytek: '+fmt(d.id))}
 function rescan(){v.xph=null;v.xphs=[];v.res=null;render();setTimeout(camOn,60)}
-async function addX(){const t=Date.now(),x={n:v.res.n,p:$('xp').value,l:v.by==='b'?v.loc:'',g:v.by+v.loc,t,by:S.who||''},pics=v.xphs||[];
- if(pics.length){x.phs=pics.map((b,i)=>String(t)+'_'+(i+1));x.ph=1;try{await idbSetMany(pics.map((b,i)=>['ph'+x.phs[i],b]))}catch(e){toast('Fotografie se nepodařilo uložit. Přebytek zatím nebyl zapsán.');return}}
- v.xph=null;v.xphs=[];S.x.push(x);logPush({kind:'x',xt:t,id:x.n,p:x.p||'Přebytek'});save();closeS();undoToast('Přebytek zapsán: '+fmt(x.n))}
+async function addX(){const t=Date.now(),pics=[...(v.xphs||[])],x={n:v.res.n,p:$('xp').value,l:v.by==='b'?v.loc:'',g:v.by+v.loc,t,by:S.who||''};
+ if(pics.length){x.phs=pics.map((b,i)=>String(t)+'_'+(i+1)+'_'+Math.random().toString(36).slice(2,7));x.ph=1;try{await idbSetMany(pics.map((b,i)=>['ph'+x.phs[i],b]));const d=await idb(),found=await new Promise((ok,no)=>{const tx=d.transaction('f','readonly'),o=tx.objectStore('f'),out=[];for(const k of x.phs){const q=o.get('ph'+k);q.onsuccess=()=>out.push(!!q.result);q.onerror=()=>no(q.error)}tx.oncomplete=()=>ok(out.filter(Boolean).length);tx.onerror=()=>no(tx.error)});d.close();if(found!==pics.length)throw new Error('Uloženo '+found+' z '+pics.length+' fotografií')}catch(e){toast('Fotografie se nepodařilo úplně uložit ('+pics.length+' snímků). Přebytek zatím nebyl zapsán.');return}}
+ v.xph=null;v.xphs=[];S.x.push(x);logPush({kind:'x',xt:t,id:x.n,p:x.p||'Přebytek'});save();closeS();undoToast('Přebytek zapsán: '+fmt(x.n)+(pics.length?' · fotografie: '+pics.length:''))}
 function reset(){v.rs=true;render()}
 function doReset(){if($('rsi').value.trim().toUpperCase()!=='SMAZAT')return;S.x.forEach(delXPhotos);S.r={};S.cf={};S.x=[];S.log=[];S.t0=0;S.bk=null;save();v.rs=false;render();toast('Výsledky smazány')}
 function sheetReset(){const n=Object.keys(S.r).length;
@@ -837,16 +837,13 @@ async function openCam(){
  const auto=()=>get({facingMode:{ideal:'environment'}});
  if(!C.deviceId)return {s:await auto()};
  try{return {s:await get({deviceId:{exact:C.deviceId}})}}catch(e){}
- // Uložené ID po novém spuštění neplatí (Android ho mohl změnit). Na chvíli se otevře automatická kamera, aby šly zjistit názvy, hned se zavře
- // a uložená kamera se otevře podle názvu. Dvě kamery najednou většina telefonů neotevře, proto se první musí zavřít.
- let m=null;
+ // Při neplatném ID nejprve zkusíme najít kameru podle názvu bez otevření dalšího video streamu.
  try{
-  const t=await auto();t.getTracks().forEach(x=>x.stop());
   const ds=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
-  m=C.deviceLabel&&ds.find(d=>d.label===C.deviceLabel)||null;
-  await new Promise(r=>setTimeout(r,200));
+  const m=C.deviceLabel&&ds.find(d=>d.label===C.deviceLabel);
+  if(m){const s=await get({deviceId:{exact:m.deviceId}});C.deviceId=m.deviceId;saveC();return {s}}
  }catch(e){}
- if(m){try{const s2=await get({deviceId:{exact:m.deviceId}});C.deviceId=m.deviceId;saveC();return {s:s2}}catch(e){}}
+ // Jediný fallback stream; žádná dočasná kamera před ním.
  return {s:await auto(),fb:true};
 }
 async function camOn(){camOff();try{
