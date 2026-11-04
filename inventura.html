@@ -304,7 +304,7 @@ const idbGet=async k=>{try{const d=await idb();return await new Promise((ok,no)=
 const DIR_DEF='Download/Inventura';
 const hasNat=m=>{try{return !!(window.Android&&typeof window.Android[m]==='function')}catch(e){return false}};
 const canPickDir=()=>typeof window.showDirectoryPicker==='function'&&!hasNat('saveFile');
-const cleanDir=p=>String(p||'').replace(/\\/g,'/').split('/').map(x=>x.trim().replace(/[<>:"|?*\x00-\x1f]/g,'')).filter(x=>x&&x!=='.'&&x!=='..').join('/').replace(/^downloads?(?=\/|$)/i,'Download');
+const cleanDir=p=>String(p||'').replace(/\\/g,'/').split('/').map(x=>x.trim().replace(/[<>:"|?*\u0000-\u001f]/g,'')).filter(x=>x&&x!=='.'&&x!=='..').join('/').replace(/^downloads?(?=\/|$)/i,'Download');
 let dirHandle=null;
 idbGet('dir').then(h=>{if(h&&typeof h==='object'){dirHandle=h;if(v.tab==='set'&&!v.it&&!v.sc&&!v.hist)render()}});
 // Vrací false při chybě, text s cestou při přesném uložení, jinak true
@@ -512,7 +512,7 @@ function cameraErrorText(e){
 }
 function setC(k,val){C[k]=val;saveC()}
 function setCam(x){C.cam=x;saveC();applyCfg()}
-function setCameraDevice(x){const o=cameraOptions.find(d=>d.id===x);C.deviceId=x||'';C.deviceLabel=x&&o?o.lab||'':'';saveC();cameraTestInfo=x?'Vybraná kamera uložena.':'Při příštím spuštění se použije výchozí zadní kamera a její ID se uloží.'}
+function setCameraDevice(x){const o=cameraOptions.find(d=>d.id===x);C.deviceId=x||'';C.deviceLabel=x&&o?o.lab||'':'';saveC();cameraTestInfo=x?'Vybraná kamera uložena.':'Kamera se bude vybírat automaticky.'}
 async function testCameras(){
  const rr=()=>{if(v.tab==='set'&&!v.sc)render()};
  if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){cameraTestInfo=cameraErrorText({name:'SecurityError'});rr();return}
@@ -565,7 +565,7 @@ function pageSet(){
  const camList=cameraOptions.slice();
  if(C.deviceId&&!camList.some(d=>d.id===C.deviceId))camList.unshift({id:C.deviceId,label:C.deviceLabel||'Dříve vybraná kamera',info:'uložená volba'});
  const fmts=FMT.map(f=>'<label class="sw sws"><span>'+f[1]+'</span><input type="checkbox"'+(C.fm.includes(f[0])?' checked':'')+' onchange="setFm(\''+f[0]+'\',this)"></label>').join('');
- const kamera='<p class="mut sm">Při prvním spuštění se použije výchozí zadní kamera telefonu a její ID se uloží. Při dalších spuštěních se používá stále stejná kamera. Pokud už není dostupná, aplikace zobrazí chybu a sama nepřepne na jiný objektiv. Jinou kameru můžeš vybrat ručně níže.</p><button class="btn" onclick="testCameras()">Načíst dostupné kamery</button><label class="mut sm" for="camdev">Používaná kamera</label><select id="camdev" class="in" onchange="setCameraDevice(this.value)"><option value=""'+(!C.deviceId?' selected':'')+'>Výchozí zadní kamera při prvním spuštění</option>'+camList.map(d=>'<option value="'+esc(d.id)+'"'+(C.deviceId===d.id?' selected':'')+'>'+esc(d.label+' — '+d.info)+'</option>').join('')+'</select><p class="mut sm">'+esc(cameraTestInfo)+'</p>'+
+ const kamera='<p class="mut sm">Automatický výběr kamery je doporučený. Vlastní kameru zvol jen když ten automatický vybere špatný objektiv.</p><button class="btn" onclick="testCameras()">Otestovat dostupné kamery</button><label class="mut sm" for="camdev">Typ kamery</label><select id="camdev" class="in" onchange="setCameraDevice(this.value)"><option value=""'+(!C.deviceId?' selected':'')+'>Automaticky (doporučeno)</option>'+camList.map(d=>'<option value="'+esc(d.id)+'"'+(C.deviceId===d.id?' selected':'')+'>'+esc(d.label+' — '+d.info)+'</option>').join('')+'</select><p class="mut sm">'+esc(cameraTestInfo)+'</p>'+
   '<label class="mut sm" for="cam2">Velikost okna kamery</label><select id="cam2" class="in" onchange="setCam(this.value)">'+op('cam',[['s','Malé'],['m','Střední'],['l','Velké (až přes půl displeje)']])+'</select>'+
   '<label class="mut sm" for="car">Oblast čtení</label><select id="car" class="in" onchange="setC(\'ar\',this.value)">'+op('ar',[['band','Široké pásmo u čáry (doporučeno)'],['narrow','Užší pruh u čáry'],['full','Celé okno kamery']])+'</select><p class="mut sm">Čte se jen z oblasti v rámečku, takže se nechytají sousední štítky. Při zapnutém samotném QR nebo Data Matrix se čte celý záběr.</p>';
  const skener='<label class="mut sm" for="ccf">Potvrzení čtení</label><select id="ccf" class="in" onchange="setC(\'cf\',+this.value)">'+op('cf',[[1,'1× (nejrychlejší)'],[2,'2× shodně za sebou (doporučeno)'],[3,'3× shodně za sebou (nejpřesnější)']])+'</select><p class="mut sm">Kód se přijme, až když ho kamera přečte vícekrát stejně. Odstraní to chybná čtení.</p>'+
@@ -615,18 +615,20 @@ function renderXPreviews(){const box=$('xpv');if(!box)return;box.innerHTML='';co
 async function xPre(e){const f=e.target.files[0];e.target.value='';if(!f)return;try{v.xphs=v.xphs||[];v.xphs.push(await shrink(f));renderXPreviews()}catch(er){toast('Foto se nepodařilo zpracovat')}}
 // Foto přímo v aplikaci: systémový výběr souboru v APK fotoaparát neotevře, proto se použije stejná kamera jako pro skenování.
 // Vrací snímek, null při zrušení, false když kamera není dostupná (pak se nabídne výběr souboru).
+// Počká na první snímek z kamery, aby se okno zobrazilo rovnou ve správné velikosti (bez problikávání ikony videa)
+function frameReady(vd,ms){return new Promise(r=>{let d=false;const f=()=>{if(d)return;d=true;vd.removeEventListener('loadeddata',f);r()};if(vd.videoWidth>0&&vd.readyState>=2)return f();vd.addEventListener('loadeddata',f);setTimeout(f,ms||1500)})}
 let shoot=null;
 function shootPhoto(){return new Promise(async res=>{
  camOff();const scanVid=$('vid');if(scanVid){try{scanVid.pause();scanVid.srcObject=null}catch(e){}}const under=document.querySelector('#app > .scrim');if(under)under.style.visibility='hidden';let s=null,tr=null,done=false,pics=[];
  const el=document.createElement('div');el.className='scrim csp';el.style.alignItems='center';el.style.zIndex=50;
- el.innerHTML='<div class="sheet" role="dialog" aria-label="Foto přebytku" style="max-width:420px;width:calc(100% - 32px);border-radius:12px"><h2>Vyfoť nalezený majetek</h2><video playsinline muted autoplay style="display:block;width:100%;height:55vh;max-height:420px;min-height:220px;aspect-ratio:4/3;background:#000;border-radius:8px;object-fit:cover"></video><p class="mut sm" id="shm">Připrav kameru a vyfoť první snímek.</p><div class="two"><button class="btn" type="button">Zrušit</button><button class="btn pri" type="button" disabled>Vyfotit</button></div><button class="btn ok" type="button" disabled style="margin-top:10px">Hotovo</button></div>';
+ el.innerHTML='<div class="sheet" role="dialog" aria-label="Foto přebytku" style="max-width:420px;width:calc(100% - 32px);border-radius:12px;opacity:0;pointer-events:none;animation:none"><h2>Vyfoť nalezený majetek</h2><video playsinline muted autoplay style="display:block;width:100%;height:55vh;max-height:420px;min-height:220px;aspect-ratio:4/3;background:#000;border-radius:8px;object-fit:cover"></video><p class="mut sm" id="shm">Připrav kameru a vyfoť první snímek.</p><div class="two"><button class="btn" type="button">Zrušit</button><button class="btn pri" type="button" disabled>Vyfotit</button></div><button class="btn ok" type="button" disabled style="margin-top:10px">Hotovo</button></div>';
  const vid=el.querySelector('video'),bs=el.querySelectorAll('button'),msg=el.querySelector('#shm'),finish=bs[2];
  const close=r=>{if(done)return;done=true;shoot=null;try{s&&s.getTracks().forEach(t=>t.stop())}catch(e){}el.remove();if(under)under.style.visibility='';res(r)};
  shoot={close};bs[0].onclick=()=>close(null);finish.onclick=()=>close(pics);el.addEventListener('click',e=>{if(e.target===el)close(null)});
  document.body.appendChild(el);
  try{if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw 0;
-  const o=await openCam();s=o.s;if(done){s.getTracks().forEach(t=>t.stop());return}
-  tr=s.getVideoTracks()[0];vid.srcObject=s;await vid.play();bs[1].disabled=false}catch(e){msg.textContent=cameraErrorText(e)+' V Nastavení můžeš vybrat jinou kameru.';close(false);return}
+  const base={width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:30,max:30}};try{s=C.deviceId?await navigator.mediaDevices.getUserMedia({video:{...base,deviceId:{exact:C.deviceId}},audio:false}):await navigator.mediaDevices.getUserMedia({video:{...base,facingMode:{ideal:'environment'}},audio:false})}catch(first){s=await navigator.mediaDevices.getUserMedia({video:{...base,facingMode:{ideal:'environment'}},audio:false})}if(done){s.getTracks().forEach(t=>t.stop());return}
+  tr=s.getVideoTracks()[0];vid.srcObject=s;await vid.play();await frameReady(vid,900);if(done)return;{const sh=el.firstChild;sh.style.opacity='';sh.style.pointerEvents=''}bs[1].disabled=false}catch(e){close(false);return}
  bs[1].onclick=async()=>{bs[1].disabled=true;msg.textContent='Fotím…';let blob=null;
   try{if(window.ImageCapture&&tr)blob=await new ImageCapture(tr).takePhoto()}catch(e){}
   if(!blob){try{const c=document.createElement('canvas');c.width=vid.videoWidth;c.height=vid.videoHeight;c.getContext('2d').drawImage(vid,0,0);blob=await new Promise(ok=>c.toBlob(ok,'image/jpeg',.9))}catch(e){}}
@@ -706,7 +708,10 @@ function tabSet(){
   v.tab='set';
   render();
   scrollTo(0,0);
-  // Seznam kamer načítáme jen po výslovném klepnutí uživatele; při otevření Nastavení se kamera nespouští.
+  if(!cameraOptions.length&&!camAuto){
+    camAuto=true;
+    setTimeout(testCameras,100);
+  }
 }
 function closeS(){camOff();v.hist=false;v.xph=null;v.xphs=[];v.rs=false;v.it=null;v.sc=false;v.res=null;render()}
 function openItem(k,fs){camOff();v.hist=false;v.sc=false;v.res=null;v.fs=!!fs;v.it=k;const d=D.find(x=>x.k===k),r0=S.r[k],r=r0&&r0.s==='m'?null:r0;v.q=Math.min(d.q,r&&r.q!=null?r.q:d.q);
@@ -830,21 +835,22 @@ function unwake(){const l=wl;wl=null;try{l&&l.release()}catch(e){}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&stream)wake()});
 async function openCam(){
  const base={width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:30,max:30}};
- const video=C.deviceId
-  ?Object.assign({},base,{deviceId:{exact:C.deviceId}})
-  :Object.assign({},base,{facingMode:{ideal:'environment'}});
- const s=await navigator.mediaDevices.getUserMedia({video,audio:false});
- // Při prvním spuštění si zapamatuj přesně tu kameru, kterou prohlížeč skutečně otevřel.
- // Při dalších spuštěních se používá výhradně toto ID; žádné automatické přepínání ani náhradní kamera.
- if(!C.deviceId){
-  const tr=s.getVideoTracks()[0],st=tr&&tr.getSettings?tr.getSettings():{};
-  if(st.deviceId){C.deviceId=st.deviceId;C.deviceLabel=tr.label||'';saveC()}
- }
- return {s};
+ const get=c=>navigator.mediaDevices.getUserMedia({video:Object.assign({},base,c),audio:false});
+ const auto=()=>get({facingMode:{ideal:'environment'}});
+ if(!C.deviceId)return {s:await auto()};
+ try{return {s:await get({deviceId:{exact:C.deviceId}})}}catch(e){}
+ // Při neplatném ID nejprve zkusíme najít kameru podle názvu bez otevření dalšího video streamu.
+ try{
+  const ds=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput');
+  const m=C.deviceLabel&&ds.find(d=>d.label===C.deviceLabel);
+  if(m){const s=await get({deviceId:{exact:m.deviceId}});C.deviceId=m.deviceId;saveC();return {s}}
+ }catch(e){}
+ // Jediný fallback stream; žádná dočasná kamera před ním.
+ return {s:await auto(),fb:true};
 }
 async function camOn(){camOff();try{
  await getDet();
- {const o=await openCam();stream=o.s}
+ {const o=await openCam();stream=o.s;if(o.fb)toast('Vybraná kamera není dostupná, tentokrát použita automatická volba')}
  track=stream.getVideoTracks()[0];wake();
  try{
   const caps=track.getCapabilities?track.getCapabilities():{};
@@ -855,7 +861,7 @@ async function camOn(){camOff();try{
    try{await track.applyConstraints({exposureMode:'continuous'})}catch(e){}
   }
  }catch(e){}
- const vd=$('vid');vd.srcObject=stream;$('cw').style.display='block';await vd.play();$('cam').style.display='none';
+ const vd=$('vid');vd.srcObject=stream;await vd.play();await frameReady(vd,1500);if(!stream)return;$('cw').style.display='block';$('cam').style.display='none';
  try{const cp=track.getCapabilities?track.getCapabilities():{};if(cp.torch&&$('tb'))$('tb').style.display='block';if(cp.zoom&&$('zm')){const z=$('zm');z.min=cp.zoom.min;z.max=Math.min(cp.zoom.max,5);z.step=cp.zoom.step||.1;z.value=Math.min(Math.max(C.zoom||1,cp.zoom.min),z.max);z.style.display='block';setZoom(z.value)}}catch(e){}
  const c=document.createElement('canvas'),x=c.getContext('2d',{willReadFrequently:true}),need=C.cf||1,say=m=>{const e=$('cst');if(e)e.textContent=m};
  cand='';candN=0;say('Hledám kód…');
