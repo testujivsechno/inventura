@@ -605,9 +605,9 @@ function installApp(){
  toast(/iphone|ipad|ipod/i.test(navigator.userAgent)?'V Safari klepni na Sdílet a Přidat na plochu':'V menu prohlížeče zvol Přidat na plochu nebo Nainstalovat aplikaci')}
 async function chkApk(){try{const r=await fetch('inventura.apk',{method:'HEAD',cache:'no-store'});if(r.ok&&!/html/i.test(r.headers.get('content-type')||'')){const a=$('apk');if(a)a.style.display='block'}}catch(e){}}
 const idbDel=async k=>{try{const d=await idb();await new Promise((ok,no)=>{const t=d.transaction('f','readwrite');t.objectStore('f').delete(k);t.oncomplete=ok;t.onerror=()=>no(t.error)})}catch(e){}};
-function photoKeys(x){const a=Array.isArray(x&&x.phs)?x.phs.slice():[];if(x&&x.ph&&x.t&&!a.includes(String(x.t)))a.unshift(String(x.t));return a}
+function photoKeys(x){if(Array.isArray(x&&x.phs)&&x.phs.length)return [...new Set(x.phs.map(String))];return x&&x.ph&&x.t?[String(x.t)]:[]}
 function delXPhotos(x){for(const k of photoKeys(x))idbDel('ph'+k)}
-async function appendXPhoto(t,b){const x=S.x.find(y=>y.t===t);if(!x)return;const keys=photoKeys(x),key=String(t)+'_'+Date.now()+'_'+(keys.length+1);await idbSet('ph'+key,b);keys.push(key);x.phs=keys;x.ph=1;save()}
+async function appendXPhoto(t,b){const x=S.x.find(y=>y.t===t);if(!x)return;const keys=photoKeys(x),key=String(t)+'_'+Date.now()+'_'+(keys.length+1)+'_'+Math.random().toString(36).slice(2,8);await idbSet('ph'+key,b);x.phs=[...new Set([...keys,key])];x.ph=1;save()}
 async function shrink(f){const b=await createImageBitmap(f),k=Math.min(1,1000/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);return await new Promise(ok=>c.toBlob(ok,'image/jpeg',.7))}
 function renderXPreviews(){const box=$('xpv');if(!box)return;box.innerHTML='';const a=v.xphs||[];box.style.display=a.length?'flex':'none';for(const b of a){const im=document.createElement('img');im.className='th';im.alt='Náhled fotografie přebytku';im.src=URL.createObjectURL(b);im.onload=()=>URL.revokeObjectURL(im.src);im.onclick=()=>im.classList.toggle('big');box.appendChild(im)}}
 async function xPre(e){const f=e.target.files[0];e.target.value='';if(!f)return;try{v.xphs=v.xphs||[];v.xphs.push(await shrink(f));renderXPreviews()}catch(er){toast('Foto se nepodařilo zpracovat')}}
