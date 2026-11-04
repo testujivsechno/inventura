@@ -112,6 +112,18 @@ label.btn{line-height:calc(48px*var(--bs))}
 :root[data-uni="1"] input[type=checkbox]{accent-color:var(--ck)}
 .top{transition:transform .2s ease}.top.hid{transform:translateY(-120%)}
 .chips{display:flex;flex-wrap:wrap;overflow:visible;scroll-snap-type:none}
+ #app[data-tab="set"] .btn{min-height:calc(44px*var(--bs));font-size:calc(15px*var(--fs));padding:0 14px;border-width:1.5px}
+#app[data-tab="set"] .two .btn{min-height:calc(46px*var(--bs))}
+#app[data-tab="set"] label.btn{line-height:calc(40px*var(--bs))}
+h2.sec{margin:30px 0 8px;padding-top:16px;border-top:1px solid var(--line);position:relative}
+h2.sec::before{content:"";position:absolute;top:-1px;left:0;width:48px;height:3px;background:var(--acc)}
+h2.sec.first{margin-top:6px;padding-top:0;border-top:0}h2.sec.first::before{display:none}
+h3.sub{margin:20px 0 6px;padding-top:12px;border-top:1px dashed var(--line);font-size:calc(16px*var(--fs));color:var(--mut)}
+h2.sec+h3.sub{margin-top:8px;padding-top:0;border-top:0}
+.ss{background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:0 14px 14px;margin:0 0 18px}
+.ss h2.sec,.ss h2.sec.first{margin:0 0 8px;padding-top:14px;border-top:0}
+.ss h2.sec::before,.ss h2.sec.first::before{display:block;top:0}
+.ss .in,.ss select.in{background:var(--bg)}
 .fchips{gap:4px 6px;margin:4px 0 6px;padding-bottom:0}
 .fchips .chip{min-height:calc(28px*var(--bs));padding:0 9px;font-size:calc(12.5px*var(--fs));font-weight:500;line-height:1}
 .fchips .chip:not(.on){color:var(--mut)}
@@ -290,7 +302,7 @@ const idbGet=async k=>{try{const d=await idb();return await new Promise((ok,no)=
 const DIR_DEF='Download/Inventura';
 const hasNat=m=>{try{return !!(window.Android&&typeof window.Android[m]==='function')}catch(e){return false}};
 const canPickDir=()=>typeof window.showDirectoryPicker==='function'&&!hasNat('saveFile');
-const cleanDir=p=>String(p||'').replace(/\\/g,'/').split('/').map(x=>x.trim().replace(/[<>:"|?*\x00-\x1f]/g,'')).filter(x=>x&&x!=='.'&&x!=='..').join('/').replace(/^download(?=\/|$)/i,'Download');
+const cleanDir=p=>String(p||'').replace(/\\/g,'/').split('/').map(x=>x.trim().replace(/[<>:"|?*\x00-\x1f]/g,'')).filter(x=>x&&x!=='.'&&x!=='..').join('/').replace(/^downloads?(?=\/|$)/i,'Download');
 let dirHandle=null;
 idbGet('dir').then(h=>{if(h&&typeof h==='object'){dirHandle=h;if(v.tab==='set'&&!v.it&&!v.sc&&!v.hist)render()}});
 // Vrací false při chybě, text s cestou při přesném uložení, jinak true
@@ -312,10 +324,11 @@ async function saveFile(blob,name,auto){
    if(p==='granted'){const fh=await dirHandle.getFileHandle(name,{create:true}),w=await fh.createWritable();await w.write(blob);await w.close();return dirHandle.name+'/'+name}}catch(e){}}
  try{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();return true}catch(e){return false}}
 function dirNote(){
- if(hasNat('saveFileTo'))return 'Telefon: soubory se ukládají přímo do složky Stažené soubory (Download). Cesta musí začínat Download/, například Download/Inventura. Při prázdné nebo jiné cestě a na Androidu starším než 10 se otevře okno Uložit jako.';
- if(hasNat('saveFile'))return 'Tato verze aplikace při každém uložení otevře okno Uložit jako. Přímé ukládání do složky bude fungovat po sestavení nového APK.';
- if(canPickDir())return 'Počítač: prohlížeč neumožňuje zapsat libovolnou cestu. Vyber složku tlačítkem níže a další soubory se do ní uloží bez ptaní. Napoprvé prohlížeč může požádat o povolení zápisu.';
- return 'Tento prohlížeč ukládá soubory do své složky stahování, cestu zde nelze použít.'}
+ if(hasNat('saveFileTo'))return 'Cesta musí začínat Download/. Při prázdné nebo jiné cestě se otevře okno Uložit jako.';
+ if(hasNat('saveFile'))return 'Tato verze aplikace se při každém uložení zeptá na složku. Přímé ukládání bude po sestavení nového APK.';
+ if(canPickDir())return 'Vyber podsložku, například Stažené soubory/Inventura (v okně výběru tlačítko Nová složka). Samotné Stažené soubory, Dokumenty ani Plochu Chrome nepovolí.';
+ return 'Prohlížeč ukládá soubory do své složky stahování.'}
+function phonePath(){const d=cleanDir(C.dir);if(!/^Download(\/|$)/.test(d))return 'okno Uložit jako (složku vybereš sám)';const p=d.split('/');if(p.length===1)return 'Stažené soubory (Download)';p[0]='Stažené soubory';return p.join(' › ')+' ('+d+')'}
 function setDir(x){C.dir=cleanDir(x);saveC();const e=$('dir');if(e)e.value=C.dir;
  if(hasNat('saveFileTo')&&C.dir&&!/^Download(\/|$)/.test(C.dir))toast('Přímo lze ukládat jen do Download/… Jiná cesta znamená okno Uložit jako.')}
 function resetDir(){C.dir=DIR_DEF;saveC();if(canPickDir()){dirHandle=null;idbSet('dir',null)}render();toast('Výchozí nastavení složky obnoveno')}
@@ -546,7 +559,7 @@ function pageSet(){
  const tg=(k,t)=>'<label class="sw sws"><span>'+t+'</span><input type="checkbox"'+(C[k]?' checked':'')+' onchange="setC(\''+k+'\',this.checked)"></label>';
  const vw=(k,t)=>'<label class="sw sws"><span>'+t+'</span><input type="checkbox"'+(C[k]?' checked':'')+' onchange="setView(\''+k+'\',this)"></label>';
  const op=(k,a)=>a.map(o=>'<option value="'+o[0]+'"'+(String(C[k])===String(o[0])?' selected':'')+'>'+o[1]+'</option>').join('');
- const H2=(t,first)=>'<h2'+(first?'':' style="margin-top:22px"')+'>'+t+'</h2>', H3=t=>'<h3 style="margin-top:14px">'+t+'</h3>';
+ const H2=(t,first)=>'<h2 class="sec'+(first?' first':'')+'">'+t+'</h2>', H3=t=>'<h3 class="sub">'+t+'</h3>';
  const camList=cameraOptions.slice();
  if(C.deviceId&&!camList.some(d=>d.id===C.deviceId))camList.unshift({id:C.deviceId,label:C.deviceLabel||'Dříve vybraná kamera',info:'uložená volba'});
  const fmts=FMT.map(f=>'<label class="sw sws"><span>'+f[1]+'</span><input type="checkbox"'+(C.fm.includes(f[0])?' checked':'')+' onchange="setFm(\''+f[0]+'\',this)"></label>').join('');
@@ -566,23 +579,24 @@ function pageSet(){
   H3('Majetkové číslo')+'<label class="mut sm" for="grp">Vložit mezeru po každých X číslicích (jen na displeji)</label><select id="grp" class="in" onchange="setC(\'group\',+this.value);render()">'+op('group',[[0,'Bez mezer'],[3,'3 číslice'],[4,'4 číslice'],[5,'5 číslic'],[6,'6 číslic'],[7,'7 číslic'],[8,'8 číslic']])+'</select><p class="mut sm">Mezery slouží pouze pro přehledné zobrazení a zadávání. Do Excelu se majetkové číslo exportuje bez mezer.</p>'+
   H3('Velikost zobrazení')+'<p class="mut sm">Změna se projeví hned. 100 % je výchozí velikost. Posuvník se mění jen tažením za tečku, klepnutí na lištu nic nezmění.</p>'+sl('fs','Písmo')+sl('bs','Tlačítka a ovládací prvky')+sl('cs','Karty')+
   H3('Ukázka')+'<div class="row" style="cursor:default"><span><span class="num idn">'+esc(fmt('1234567890'))+'</span> <span class="mut sm">Počet: <b>1 ks</b></span></span><span></span><span class="span2">Ukázková karta položky</span></div><button class="btn" style="margin-bottom:10px">Ukázkové tlačítko</button><button class="btn" onclick="resetScale()">Obnovit výchozí velikosti</button>';
- const dirUI=H3('Kam ukládat soubory')+'<p class="mut sm">Zálohy (JSON) i exporty (xlsx) se ukládají do této složky.</p>'+
-  (canPickDir()?'<p><b>Vybraná složka:</b> '+esc(dirHandle?dirHandle.name:'zatím nevybrána')+'</p>':'<label class="mut sm" for="dir">Cesta ke složce</label><input id="dir" class="in" value="'+esc(C.dir||'')+'" placeholder="'+DIR_DEF+'" autocapitalize="off" autocomplete="off" spellcheck="false" onchange="setDir(this.value)">')+
-  '<p class="mut sm">'+esc(dirNote())+'</p>'+(canPickDir()?'<div class="two"><button class="btn" onclick="resetDir()">Zapomenout složku</button><button class="btn" onclick="pickDir()">Vybrat složku…</button></div>':'<button class="btn" onclick="resetDir()">Obnovit výchozí cestu</button>');
+ const dirUI=H3('Kam ukládat soubory')+'<p class="mut sm">Zálohy (JSON) a exporty (xlsx) se ukládají:</p><p class="sm"><b>V telefonu:</b> '+esc(phonePath())+'.<br><b>V počítači:</b> do vybrané složky, jinak do stahování prohlížeče.<br><b>Fotky přebytků:</b> jsou součástí zálohy (JSON).</p>'+
+  (canPickDir()?'<p><b>Složka:</b> '+esc(dirHandle?dirHandle.name:'výchozí (stahování prohlížeče)')+'</p>':'<label class="mut sm" for="dir">Cesta ke složce</label><input id="dir" class="in" value="'+esc(C.dir||'')+'" placeholder="'+DIR_DEF+'" autocapitalize="off" autocomplete="off" spellcheck="false" onchange="setDir(this.value)">')+
+  '<p class="mut sm">'+esc(dirNote())+'</p>'+(canPickDir()?'<div class="two"><button class="btn" onclick="resetDir()">Výchozí složka</button><button class="btn" onclick="pickDir()">Vybrat složku…</button></div>':'<button class="btn" onclick="resetDir()">Výchozí cesta</button>');
  const zaloha=tg('bkOn','Připomínat zálohu')+
   '<label class="mut sm" for="bkn">Po kolika nezálohovaných položkách</label><select id="bkn" class="in" onchange="setC(\'bkN\',+this.value)">'+op('bkN',[[0,'Vypnuto'],[10,'10 položek'],[20,'20 položek'],[50,'50 položek'],[100,'100 položek']])+'</select>'+
   '<label class="mut sm" for="bkm">Po kolika minutách od poslední zálohy</label><select id="bkm" class="in" onchange="setC(\'bkM\',+this.value)">'+op('bkM',[[0,'Vypnuto'],[15,'15 minut'],[30,'30 minut'],[60,'1 hodina'],[120,'2 hodiny']])+'</select>'+
   dirUI+H3('Automatická záloha')+tg('auto','Zálohu stáhnout automaticky (soubor JSON)')+tg('bkQuit','Při ukončení aplikace uložit zálohu (jsou-li nezálohované položky)')+'<p class="mut sm">Po dosažení limitu se záloha sama uloží do nastavené složky. Chrome na Androidu může jednou požádat o povolení více stažení, Safari na iPhonu automatické stahování může blokovat. Záloha obsahuje i fotky přebytků.</p><button class="btn" onclick="backup()">Uložit zálohu teď</button>';
  const zvuk='<div class="set"><div class="hd"><label for="s_vol">Hlasitost</label><b class="num" id="sv_vol">'+Math.round((C.vol==null?.6:C.vol)*100)+' %</b></div><input id="s_vol" class="rg" type="range" min="0.1" max="1" step="0.05" value="'+(C.vol==null?.6:C.vol)+'" oninput="setVol(this.value)" onchange="testBeep()"></div>';
  const vraceni='<label class="mut sm" for="ut">Jak dlouho se zobrazuje hláška s tlačítkem Vrátit</label><select id="ut" class="in" onchange="setC(\'ut\',+this.value)">'+op('ut',[[3,'3 sekundy'],[6,'6 sekund (výchozí)'],[10,'10 sekund'],[15,'15 sekund'],[30,'30 sekund']])+'</select><p class="mut sm">Po zápisu položky nebo přebytku se na chvíli objeví hláška, kterou můžeš zápis vrátit. Starší zápisy jdou vrátit i potom na kartě Souhrn v části Poslední zápisy a vrácení.</p>';
- return '<header class="top"><h1>NASTAVENÍ</h1></header>'+
-  H2('Kamera',1)+kamera+
+ const body=H2('Kamera',1)+kamera+
   H2('Skener')+skener+
   H2('Záloha')+zaloha+
   H2('Hlavní obrazovka')+'<p class="mut sm">Které volby se zobrazí nahoře na hlavní obrazovce Inventura. Aspoň jedna musí zůstat zapnutá.</p>'+vw('showO','Podle osob')+vw('showAll','Vše')+vw('showB','Podle budov')+
   H2('Vzhled')+vzhled+
   H2('Vrácení zápisu')+vraceni+
-  H2('Zvuk a vibrace')+tg('snd','Zvukové signály')+tg('vib','Vibrace')+zvuk+'<p class="mut sm">Vibrace nepodporuje Safari na iPhonu, tam fungují jen zvuky. Pokud je ticho, zkontroluj hlasitost médií a na iPhonu přepínač tichého režimu.</p><button class="btn" onclick="testSignals()">Vyzkoušet signály</button>'}
+  H2('Zvuk a vibrace')+tg('snd','Zvukové signály')+tg('vib','Vibrace')+zvuk+'<p class="mut sm">Vibrace nepodporuje Safari na iPhonu, tam fungují jen zvuky. Pokud je ticho, zkontroluj hlasitost médií a na iPhonu přepínač tichého režimu.</p><button class="btn" onclick="testSignals()">Vyzkoušet signály</button>';
+ // Každá sekce je v samostatném podbarveném rámečku
+ return '<header class="top"><h1>NASTAVENÍ</h1></header>'+body.split('<h2 class="sec').map((p,i)=>i?'<section class="ss"><h2 class="sec'+p+'</section>':p).join('')}
 
 let dip=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dip=e});
 function installApp(){
@@ -658,7 +672,7 @@ function sheetScan(){const x=v.res,A=aimDims();let b;
  else b='<p class="warn">Číslo není v evidenci.</p>'+(x.xd?'<p class="mut sm">Tento přebytek už je zapsaný. Zapsáním přidáš další kus.</p>':'')+'<input id="xp" class="in" placeholder="Popis nalezeného majetku"><button type="button" class="btn" style="margin:0 0 10px" onclick="takeX()">Vyfotit nalezený majetek</button><input id="xph" type="file" accept="image/*" capture="environment" hidden onchange="xPre(event)"><img id="xpv" class="th" style="display:none;margin:0 0 10px" alt="Náhled fotky"><button class="btn ok" onclick="addX()">Zapsat přebytek</button><button class="btn" style="margin-top:10px" onclick="rescan()">Skenovat dál</button>';
  return '<div class="scrim" onclick="if(event.target===this)closeS()"><div class="sheet" role="dialog" aria-label="Skenování"><div class="hd"><h2>Skenování štítku</h2><button class="xb" onclick="closeS()" aria-label="Zavřít">✕</button></div><div class="cw" id="cw" onclick="focusTap()"><video id="vid" playsinline muted></video><div class="aim'+(A.m==='full'?' full':'')+'" id="aim" style="width:'+Math.round(A.ww*100)+'%;height:'+Math.round(A.hh*100)+'%"></div><button class="tb" id="tb" onclick="torch()">Svítilna</button></div><input id="zm" class="rg" type="range" style="display:none" oninput="setZoom(this.value)" aria-label="Zoom kamery"><button class="btn pri" id="cam" onclick="camOn()" style="display:none">Zkusit kameru znovu</button><p class="mut sm" id="cst"></p><p class="mut sm">Kamera čte kód sama. Drž telefon klidně a namiř červenou čáru na čárový kód. Začni asi z 15–25 cm; pokud je obraz rozmazaný, trochu telefon oddal a klepni na obraz pro nové zaostření. Posuvníkem přibližuj jen postupně. Když se kód nedaří, použij Vyfotit štítek.</p><input id="sn" class="in" inputmode="numeric" autocomplete="off" placeholder="Nebo zadej majetkové číslo" value="'+(x?esc(fmt(x.n)):'')+'" oninput="formatScanInput(this)" onkeydown="if(event.key===\'Enter\')doScan()">'+b+'</div></div>'}
 
-function render(){const p=v.tab==='sum'?pageSum():v.tab==='set'?pageSet():v.loc?pageLoc():pageHome();
+function render(){$('app').dataset.tab=v.tab;const p=v.tab==='sum'?pageSum():v.tab==='set'?pageSet():v.loc?pageLoc():pageHome();
  $('app').innerHTML=p+'<nav class="nav"><button class="'+(v.tab==='home'?'on':'')+'" onclick="tabHome()">INVENTURA</button><button class="'+(v.tab==='sum'?'on':'')+'" onclick="tabSum()">SOUHRN</button><button class="'+(v.tab==='set'?'on':'')+'" onclick="tabSet()" aria-label="Nastavení" title="Nastavení"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button><button onclick="quitApp()" aria-label="Ukončit aplikaci" title="Ukončit aplikaci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button></nav>'+(v.hist?sheetHist():v.it?sheetItem():v.sc?sheetScan():'')+(v.rs?sheetReset():'')+(v.nf?sheetNew():'');if(v.tab==='set'){chkApk();enhSel()}loadPhotos()}
 function go(l){v.tab='home';v.loc=l||null;v.f='';v.sf='';render();scrollTo(0,0)}
 function goAll(){v.tab='home';v.loc=ALL_LOC;v.f='';v.sf='';render();scrollTo(0,0)}
