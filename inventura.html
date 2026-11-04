@@ -161,6 +161,7 @@ select.in{margin-bottom:4px}
 .nav svg{width:calc(26px*var(--fs));height:calc(26px*var(--fs));vertical-align:middle}
 .toast.act{pointer-events:auto}.toast .ub{margin-left:12px;min-height:36px;padding:0 12px;border:0;border-radius:6px;background:var(--acc);color:var(--on);font:600 15px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer}
 .th{width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line);justify-self:start;cursor:pointer;background:var(--bg)}
+.xphotos{display:flex;flex-wrap:wrap;gap:8px;min-width:0}.xphotos .th{flex:0 0 96px}.xphotos .th.big{flex:1 1 100%;width:100%}
 .th.big{width:100%;height:auto;max-height:60vh;object-fit:contain}
 </style></head><body>
 <div class="wrap" id="app"></div><div id="toast" class="toast" role="status"></div>
@@ -451,7 +452,7 @@ function rows(){if(v.sf==='x')return xs().length?'':'<p class="mut">Žádný př
 function pageLoc(){if(!C.zf&&v.sf&&fcount(v.sf)===0)v.sf='';
  const allMode=v.loc===ALL_LOC,X=(v.sf==='x'||(v.sf===''&&!allMode))?xs():[],n=done(v.loc),t=inLoc(v.loc).length;
  return '<header class="top"><div class="ttl"><button class="back" onclick="go(null)">‹ Inventura</button><span class="mut sm">'+n+' z '+t+' položek</span></div><h1>'+esc(allMode?'Celý majetek':v.loc)+'</h1>'+bar(n,t)+'<input id="fl" class="in" placeholder="Hledat číslo, popis, sériové číslo" value="'+esc(v.f)+'" oninput="handleSearchInput(this.value)">'+chips()+'</header><div id="lst">'+rows()+'</div>'+
- X.map(x=>{const photos=photoKeys(x);return '<div class="row"><span class="num idn">'+esc(fmt(x.n))+'</span><span class="pill x">Přebytek</span><span class="span2">'+esc(x.p||'Bez popisu')+'</span>'+photos.map(k=>'<img class="th" data-ph="'+esc(k)+'" alt="Fotka přebytku" onclick="this.classList.toggle(\'big\')">').join('')+'<span class="span2"><button type="button" class="chip" onclick="takeXh('+x.t+')">'+(photos.length?'Přidat další fotku':'Přidat fotku')+'</button><input id="xf'+x.t+'" type="file" accept="image/*" capture="environment" hidden onchange="xShot(event,'+x.t+')"></span></div>'}).join('')+'<button class="btn pri fab" onclick="openScan()">Skenovat štítek</button>'}
+ X.map(x=>{const photos=photoKeys(x);return '<div class="row"><span class="num idn">'+esc(fmt(x.n))+'</span><span class="pill x">Přebytek</span><span class="span2">'+esc(x.p||'Bez popisu')+'</span><div class="span2 xphotos">'+photos.map(k=>'<img class="th" data-ph="'+esc(k)+'" alt="Fotka přebytku" onclick="this.classList.toggle(\'big\')">').join('')+'</div><span class="span2"><button type="button" class="chip" onclick="takeXh('+x.t+')">'+(photos.length?'Přidat další fotku':'Přidat fotku')+'</button><input id="xf'+x.t+'" type="file" accept="image/*" capture="environment" hidden onchange="xShot(event,'+x.t+')"></span></div>'}).join('')+'<button class="btn pri fab" onclick="openScan()">Skenovat štítek</button>'}
 
 // Debounce pro vyhledávání (200 ms zpoždění pro plynulost na mobilu)
 let searchDebounceTimer;
