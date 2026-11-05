@@ -1119,13 +1119,14 @@ async function chkStore(){const e=$('stg');if(!e)return;
 async function askPersist(){try{const ok=await navigator.storage.persist();toast(ok?'Trvalé úložiště zapnuto':'Telefon trvalé úložiště nepovolil')}catch(e){toast('Požadavek se nepodařil')}chkStore()}
 async function chkOffline(){const e=$('ofl');if(!e)return;
  try{
-  if(!('caches' in window)){e.textContent='Offline provoz: tento způsob spuštění neumožňuje ověřit uložené soubory.';return}
+  if(location.protocol==='file:'){e.textContent='Offline: aplikace běží přímo ze souboru v počítači a internet nepotřebuje, pokud jsou vedle ní soubory xlsx.full.min.js, zxing.min.js a inventura.json. Offline cache (sw.js) se při tomto způsobu spuštění nepoužívá.';return}
+  if(!('caches' in window)){e.textContent='Offline: tento způsob spuštění neumožňuje zjistit, jestli aplikace funguje bez internetu.';return}
   const need=['xlsx.full.min.js','zxing.min.js','inventura.json','icon.svg'],miss=[];
   try{if(!(await caches.match(new Request(location.href.split('#')[0]))))miss.push('stránka aplikace')}catch(x){}
   for(const f of need){try{if(!(await caches.match(f)))miss.push(f)}catch(x){miss.push(f)}}
   const sw=navigator.serviceWorker&&navigator.serviceWorker.controller,e2=$('ofl');if(!e2)return;
-  e2.textContent='Offline provoz: '+(!sw?'servisní worker tuto stránku zatím neřídí (po prvním načtení a restartu aplikace se aktivuje).':miss.length?'v offline cache chybí: '+miss.join(', ')+'. Doplň je do seznamu souborů v sw.js.':'v pořádku, všechny kontrolované soubory jsou uložené.')}
- catch(x){const e3=$('ofl');if(e3)e3.textContent='Offline provoz se nepodařilo ověřit.'}}
+  e2.textContent='Offline: '+(!sw?'offline cache zatím není aktivní. Aplikace se uloží pro práci bez internetu po prvním načtení přes internet a po restartu aplikace.':miss.length?'bez internetu by nefungovaly tyto soubory: '+miss.join(', ')+'. Je potřeba je doplnit do seznamu souborů v sw.js.':'v pořádku, aplikace funguje i bez internetu.')}
+ catch(x){const e3=$('ofl');if(e3)e3.textContent='Offline: nepodařilo se zjistit, jestli aplikace funguje bez internetu.'}}
 function showSkipped(){const el=document.createElement('div');el.className='scrim';el.style.alignItems='center';el.style.zIndex=40;
  el.innerHTML='<div class="sheet" role="dialog" aria-modal="true" style="max-width:480px;width:calc(100% - 32px);border-radius:12px;padding:22px 20px 20px;max-height:85vh;overflow:auto"><h2 style="margin:0 0 10px">Přeskočené řádky ('+SK.length+')</h2><p class="mut sm" style="margin:0 0 12px;line-height:1.45">V těchto řádcích není v sloupci Majetkové číslo číslo o 6 a více číslicích, proto se nedají skenovat ani hledat. Čísla řádků odpovídají řádkům v Excelu.</p>'+SK.slice(0,300).map(s=>'<div style="padding:8px 0;border-top:1px solid var(--line)"><b class="num">řádek '+s.r+'</b> · '+esc(s.id)+(s.p?'<br><span class="mut sm">'+esc(s.p)+'</span>':'')+'</div>').join('')+(SK.length>300?'<p class="mut sm">Zobrazeno prvních 300 řádků.</p>':'')+'<button class="btn pri" type="button" style="margin-top:16px" id="skc">Zavřít</button></div>';
  el.addEventListener('click',e=>{if(e.target===el||e.target.id==='skc')el.remove()});document.body.appendChild(el)}
