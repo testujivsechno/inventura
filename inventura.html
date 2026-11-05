@@ -41,7 +41,7 @@ dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:10px 0}dt{col
 .vf{border:3px dashed var(--acc);border-radius:8px;padding:28px 12px;text-align:center;color:var(--mut);margin:10px 0}.warn{color:var(--bad);font-weight:600}
 .grid4{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}.stat{background:var(--surf);border:1px solid var(--line);border-radius:8px;padding:10px 12px}.stat{font:inherit;color:var(--ink);text-align:left;cursor:pointer;width:100%}.stat.dim{opacity:.55;cursor:default}.stat:not(.dim):active{filter:brightness(1.25)}.stat b{display:block;font-size:34px;line-height:1}
 .scroll{overflow-x:auto;margin-bottom:14px}table{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--line)}th{color:var(--mut);font-weight:600}
-.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 12px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:30;opacity:0;pointer-events:none;transition:opacity .15s;font-weight:600}.toast.on{opacity:1}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 12px);transform:translateX(-50%);width:max-content;max-width:calc(100vw - 24px);box-sizing:border-box;text-align:center;line-height:1.35;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;z-index:30;opacity:0;pointer-events:none;transition:opacity .15s;font-weight:600}.toast.on{opacity:1}
 :focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 label.btn{display:block;text-align:center;line-height:48px}video{display:none;width:100%;max-height:240px;border-radius:8px;background:#0b111c;object-fit:cover;margin:8px 0}.csp video{display:block;width:100%;max-height:55vh;object-fit:cover;margin:8px 0}.hd{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.xb{flex:none;width:44px;height:44px;border:1px solid var(--line);border-radius:50%;background:var(--bg);color:var(--ink);font-size:20px;line-height:1;cursor:pointer}
 .chips{display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto;align-items:center;margin:6px 0 10px;padding-bottom:4px}
@@ -161,11 +161,18 @@ select.in{margin-bottom:4px}
 @media(prefers-reduced-motion:reduce){.aim::after{animation:none}}
 .tb{position:absolute;right:8px;bottom:8px;display:none;min-height:40px;width:auto;padding:0 14px;border-radius:99px;border:0;background:rgba(0,0,0,.6);color:#fff;font:600 14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer}
 .nav svg{width:calc(26px*var(--fs));height:calc(26px*var(--fs));vertical-align:middle}
-.toast.act{pointer-events:auto}.toast .ub{margin-left:12px;min-height:36px;padding:0 12px;border:0;border-radius:6px;background:var(--acc);color:var(--on);font:600 15px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer}
+.toast.act{pointer-events:auto;display:flex;align-items:center;gap:12px;width:calc(100vw - 24px);max-width:480px;text-align:left;padding:12px 12px 12px 16px;font-size:16px}.toast .tm{flex:1;min-width:0;overflow-wrap:anywhere}.toast .ub{flex:none;margin-left:0;min-height:44px;min-width:84px;padding:0 16px;border:0;border-radius:6px;background:var(--acc);color:var(--on);font:600 15px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer}
 .th{width:96px;height:96px;object-fit:cover;border-radius:8px;border:1px solid var(--line);justify-self:start;cursor:pointer;background:var(--bg)}
 .xphotos{display:flex;flex-wrap:wrap;gap:8px;min-width:0}.xphotos .th{flex:0 0 96px}.xphotos .th.big{flex:1 1 100%;width:100%}
 .th.big{width:100%;height:auto;max-height:60vh;object-fit:contain}
 .th.sel{outline:4px solid var(--ck);outline-offset:-4px;opacity:.55}
+.pv{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pv.z{display:block;overflow:auto}
+.pvi{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.pv.z .pvi{max-width:none;max-height:none;width:220%}
+.pvb{position:fixed;z-index:81;width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.2);color:#fff;font-size:28px;line-height:46px;text-align:center;padding:0;cursor:pointer}
+.pvp{left:10px;top:50%;margin-top:-24px}.pvn{right:10px;top:50%;margin-top:-24px}.pvx{right:10px;top:max(10px,env(safe-area-inset-top))}
+.pvc{position:fixed;z-index:81;left:0;right:0;top:max(16px,env(safe-area-inset-top));text-align:center;color:#fff;font-size:15px;pointer-events:none}
 .chip.bad{border-color:var(--bad);color:var(--bad)}.chip:disabled{opacity:.4;cursor:not-allowed}
 .xpc{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
 </style></head><body>
@@ -221,7 +228,7 @@ function applyTheme(){
 }
 function applyCfg(){const de=document.documentElement,st=de.style;applyTheme();st.setProperty('--fs',C.fs);st.setProperty('--bs',C.bs);st.setProperty('--cs',C.cs);st.setProperty('--camh',({s:'240px',m:'340px',l:'min(58vh,480px)'})[C.cam]||'340px')}
 applyCfg();
-let SRC=null,SHN='',HR=0,RO=0,CO=0,WB,WS,COL={},D=[],locs=[],FN='',v={by:'o',sf:'',sn:'',tab:'home',loc:null,it:null,sc:false,res:null,q:0,f:'',fs:false,rs:false},tt;
+let SK=[],SRC=null,SHN='',HR=0,RO=0,CO=0,WB,WS,COL={},D=[],locs=[],FN='',v={by:'o',sf:'',sn:'',tab:'home',loc:null,it:null,sc:false,res:null,q:0,f:'',fs:false,rs:false},tt;
 
 const stat=d=>{const r=S.r[d.k];if(!r)return 'c';if(r.s==='m')return 'm';if(d.q>1&&(r.q||0)<d.q)return 'p';return 'f'};
 const isDone=d=>{const s=stat(d);return s==='f'||s==='m'};
@@ -282,13 +289,13 @@ function load(buf,name){
  if(hr<0){toast('V souboru chybí sloupec Majetkové číslo');return false}HR=hr;
  const H=A[hr].map(c=>norm(c).toLowerCase()),f=re=>H.findIndex(h=>re.test(h));
  COL={id:f(/^majetkové č/),p:f(/^popis$/),d:f(/^další popis/),sn:f(/^výrobní/),q:f(/^množství/),u:f(/^detail umíst/),b:f(/^budova/),o:f(/^odpovědn/),ks:f(/^ks$/),lab:f(/^štítek/),st:f(/inven.*stav/),use:f(/používán/),nt:f(/^interní pozn/),dt:f(/^datum inventury/),by:f(/^inventuru prov/),note:f(/^poznámky/)};
- D=[];let skipped=0;const seen={};A.forEach((r,i)=>{
+ D=[];let skipped=0;SK=[];const seen={};A.forEach((r,i)=>{
   if(i<=hr)return;
   let rawId = r[COL.id];
   if(rawId==null) return;
   let id = idText(rawId);
   if(!id) return;
-  if(!/^\d{6,}$/.test(id)){skipped++;return}
+  if(!/^\d{6,}$/.test(id)){skipped++;SK.push({r:i+1+RO,id,p:norm(r[COL.p])});return}
   const idCellKey = XLSX.utils.encode_cell({r:i, c:COL.id});
   if(WS[idCellKey]) {
    WS[idCellKey].t = 's';
@@ -351,7 +358,7 @@ async function backup(auto){
  const ph={};
  for(const x of S.x){for(const k of photoKeys(x)){try{const b=await idbGet('ph'+k);const u=b&&await blobUrl(b);if(u)ph[k]=u}catch(e){}}}
  const o={app:'inventura',ver:1,saved:new Date().toISOString(),file:FN,who:S.who||'',r:S.r,x:S.x,ph};
- const where=await saveFile(new Blob([JSON.stringify(o)],{type:'application/json'}),'Inventura_zaloha_'+new Date().toISOString().slice(0,16).replace(/[-:T]/g,'')+'.json',auto);
+ const where=await saveFile(new Blob([JSON.stringify(o)],{type:'application/json'}),'Inventura_zaloha_'+(norm(S.who)?norm(S.who).replace(/[^\p{L}\p{N}]+/gu,'_')+'_':'')+new Date().toISOString().slice(0,16).replace(/[-:T]/g,'')+'.json',auto);
  if(where===false){if(!auto)toast('Zálohu se nepodařilo uložit');return}
  markSaved();if(!auto||(!v.sc&&!v.it))render();if(!auto)toast('Záloha uložena'+(typeof where==='string'?': '+where:''))}
 const nm=x=>norm(x).toLowerCase();
@@ -418,6 +425,7 @@ function xpZip(ents,mime){const parts=[],cd=[];let off=0;
  let cds=0;for(const c of cd)cds+=c.length;
  const end=new Uint8Array(22),ev=new DataView(end.buffer);ev.setUint32(0,0x06054b50,true);ev.setUint16(8,ents.length,true);ev.setUint16(10,ents.length,true);ev.setUint32(12,cds,true);ev.setUint32(16,off,true);
  return new Blob([...parts,...cd,end],{type:mime||'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})}
+const xpBin=(name,b)=>({name,nb:xpTE.encode(name),fl:0x800,me:0,tm:0,dt:33,crc:xpCrc(b),cs:b.length,us:b.length,raw:b});
 const xpEnt=(name,str)=>{const b=xpTE.encode(str);return {name,nb:xpTE.encode(name),fl:0x800,me:0,tm:0,dt:33,crc:xpCrc(b),cs:b.length,us:b.length,raw:b}};
 const xpXe=s=>String(s==null?'':s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const xpUn=s=>String(s).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&amp;/g,'&');
@@ -607,7 +615,7 @@ function pageSum(){
  return '<header class="top"><h1>SOUHRN</h1></header>'+confl()+
  (D.length?'<label class="mut sm" for="psn">Filtrovat souhrn podle osoby z evidence:</label><select id="psn" class="in" onchange="setSn(this.value)"><option value="">Všechny osoby</option>'+P.map(p=>'<option value="'+esc(p)+'"'+(p===v.sn?' selected':'')+'>'+esc(p)+'</option>').join('')+'</select>':'')+
  '<div class="grid4">'+[['Položek celkem',L.length,''],['Zbývá',c('c'),'c'],['Nalezeno',c('f'),'f'],['Nenalezeno',c('m'),'m'],['Přebytek',px,'x'],['Bez štítku',c('l'),'l']].map(a=>a[1]>0?'<button type="button" class="stat" onclick="sumGo(\''+a[2]+'\')"><b class="num">'+a[1]+'</b>'+a[0]+'</button>':'<div class="stat dim"><b class="num">'+a[1]+'</b>'+a[0]+'</div>').join('')+'</div>'+
- (D.length?(v.sn?'<p class="mut sm">Přebytek = zapsaný při práci ve skupině této osoby (režim Podle osob).</p>':'')+'<label class="mut sm" for="who">Kdo provádí inventuru (zapíše se do sloupce Inventuru provedl):</label><input id="who" class="in" placeholder="Tvoje jméno" value="'+esc(S.who)+'" oninput="S.who=this.value;save()"><button class="btn pri" onclick="exp(\'mine\')">Exportovat jen moje změny (xlsx)</button><button class="btn" style="margin-top:10px" onclick="exp(\'all\')">Exportovat vše sloučené (xlsx)</button><label class="btn" style="margin-top:10px" for="fi2">Načíst jiný soubor</label><input id="fi2" type="file" accept=".xlsx,.xlsm" hidden onchange="pick(event)"><p class="mut sm">Jen moje změny zapíše pouze řádky a přebytky, které zapsalo jméno uvedené výše, a nepřepíše řádky, které už vyplnil někdo jiný. Vše sloučené zapíše výsledky všech lidí ze sloučených záloh, každý řádek se jménem a datem jeho autora. Položky s nevyřešeným konfliktem se vždy přeskočí. Přebytky jdou na list Prebytky, duplicitní čísla (jen u Vše sloučené) na list Duplicity. Načtení jiného souboru nahradí seznam položek. Pokud k němu uložené výsledky nesedí, aplikace se zeptá, co s nimi.</p><h2>Záloha výsledků</h2><p class="mut sm">'+bkInfo()+' Zálohu lze načíst do jiného telefonu a výsledky se sloučí (stejnou položku zapsanou stejným člověkem nahradí novější záznam, odlišné zápisy různých lidí aplikace nepřepíše a nabídne je k rozhodnutí v Souhrnu).</p><button class="btn" onclick="backup()">Uložit zálohu (JSON)</button><label class="btn" for="rf">Načíst nebo sloučit zálohu</label><input id="rf" type="file" accept=".json,application/json" hidden onchange="restore(event)">':'<p class="mut">Nejdřív načti soubor na kartě Inventura.</p>')+'<button class="btn" style="margin-top:10px" onclick="openHist()">Poslední zápisy a vrácení</button><button class="btn" style="margin-top:10px" onclick="reset()">Smazat výsledky</button>'}
+ (D.length?(v.sn?'<p class="mut sm">Přebytek = zapsaný při práci ve skupině této osoby (režim Podle osob).</p>':'')+'<label class="mut sm" for="who">Kdo provádí inventuru (zapíše se do sloupce Inventuru provedl):</label><input id="who" class="in" placeholder="Tvoje jméno" value="'+esc(S.who)+'" oninput="S.who=this.value;save()"><button class="btn pri" onclick="exp(\'mine\')">Exportovat jen moje změny (xlsx)</button><button class="btn" style="margin-top:10px" onclick="exp(\'all\')">Exportovat vše sloučené (xlsx)</button><label class="btn" style="margin-top:10px" for="fi2">Načíst jiný soubor</label><input id="fi2" type="file" accept=".xlsx,.xlsm" hidden onchange="pick(event)">'+(SK.length?'<button class="btn" style="margin-top:10px" onclick="showSkipped()">Přeskočené řádky ('+SK.length+')</button>':'')+'<p class="mut sm">Jen moje změny zapíše pouze řádky a přebytky, které zapsalo jméno uvedené výše, a nepřepíše řádky, které už vyplnil někdo jiný. Vše sloučené zapíše výsledky všech lidí ze sloučených záloh, každý řádek se jménem a datem jeho autora. Položky s nevyřešeným konfliktem se vždy přeskočí. Přebytky jdou na list Prebytky, duplicitní čísla (jen u Vše sloučené) na list Duplicity. Načtení jiného souboru nahradí seznam položek. Pokud k němu uložené výsledky nesedí, aplikace se zeptá, co s nimi.</p><h2>Záloha výsledků</h2><p class="mut sm">'+bkInfo()+' Zálohu lze načíst do jiného telefonu a výsledky se sloučí (stejnou položku zapsanou stejným člověkem nahradí novější záznam, odlišné zápisy různých lidí aplikace nepřepíše a nabídne je k rozhodnutí v Souhrnu).</p><button class="btn" onclick="backup()">Uložit zálohu (JSON)</button>'+(S.x.some(x=>photoKeys(x).length)?'<button class="btn" style="margin-top:10px" onclick="exportPhotos()">Uložit fotky přebytků (ZIP)</button>':'')+'<label class="btn" for="rf">Načíst nebo sloučit zálohu</label><input id="rf" type="file" accept=".json,application/json" hidden onchange="restore(event)">':'<p class="mut">Nejdřív načti soubor na kartě Inventura.</p>')+'<button class="btn" style="margin-top:10px" onclick="openHist()">Poslední zápisy a vrácení</button><button class="btn" style="margin-top:10px" onclick="reset()">Smazat výsledky</button>'}
 
 let camAuto=false,cameraOptions=[],cameraTestInfo='Kamery ještě nebyly otestovány.';
 function cameraErrorText(e){
@@ -713,9 +721,13 @@ function pageSet(){
   dirUI+H3('Automatická záloha')+tg('auto','Zálohu stáhnout automaticky (soubor JSON)')+tg('bkQuit','Při ukončení aplikace uložit zálohu (jsou-li nezálohované položky)')+'<p class="mut sm">Po dosažení limitu se záloha sama uloží do nastavené složky. Chrome na Androidu může jednou požádat o povolení více stažení, Safari na iPhonu automatické stahování může blokovat. Záloha obsahuje i fotky přebytků.</p><button class="btn" onclick="backup()">Uložit zálohu teď</button>';
  const zvuk='<div class="set"><div class="hd"><label for="s_vol">Hlasitost</label><b class="num" id="sv_vol">'+Math.round((C.vol==null?.6:C.vol)*100)+' %</b></div><input id="s_vol" class="rg" type="range" min="0.1" max="1" step="0.05" value="'+(C.vol==null?.6:C.vol)+'" oninput="setVol(this.value)" onchange="testBeep()"></div>';
  const vraceni='<label class="mut sm" for="ut">Jak dlouho se zobrazuje hláška s tlačítkem Vrátit</label><select id="ut" class="in" onchange="setC(\'ut\',+this.value)">'+op('ut',[[3,'3 sekundy'],[6,'6 sekund (výchozí)'],[10,'10 sekund'],[15,'15 sekund'],[30,'30 sekund']])+'</select><p class="mut sm">Po zápisu položky nebo přebytku se na chvíli objeví hláška, kterou můžeš zápis vrátit. Starší zápisy jdou vrátit i potom na kartě Souhrn v části Poslední zápisy a vrácení.</p>';
+ const fotky='<label class="mut sm" for="pxs">Rozlišení fotek přebytků</label><select id="pxs" class="in" onchange="setC(\'phpx\',+this.value)">'+[[1000,'Úsporné (1000 px, výchozí)'],[1600,'Čitelnější štítky (1600 px)'],[2400,'Nejlepší (2400 px, velké soubory)']].map(o=>'<option value="'+o[0]+'"'+((+C.phpx||1000)===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select><p class="mut sm">Platí pro nově pořízené fotky. Větší rozlišení zabere víc místa v telefonu i v záloze. Už pořízené fotky se nemění.</p>';
+ const uloziste='<p class="mut sm" id="stg">Zjišťuji stav úložiště…</p><p class="mut sm" id="ofl">Zjišťuji offline provoz…</p>';
  const body=H2('Kamera',1)+kamera+
   H2('Skener')+skener+
+  H2('Fotky přebytků')+fotky+
   H2('Záloha')+zaloha+
+  H2('Úložiště a offline')+uloziste+
   H2('Hlavní obrazovka')+'<p class="mut sm">Které volby se zobrazí nahoře na hlavní obrazovce Inventura. Aspoň jedna musí zůstat zapnutá.</p>'+vw('showO','Podle osob')+vw('showAll','Vše')+vw('showB','Podle budov')+
   H2('Vrácení zápisu')+vraceni+
   H2('Vzhled')+vzhled+
@@ -732,13 +744,30 @@ async function chkApk(){try{const r=await fetch('inventura.apk',{method:'HEAD',c
 const idbDel=async k=>{try{const d=await idb();await new Promise((ok,no)=>{const t=d.transaction('f','readwrite');t.objectStore('f').delete(k);t.oncomplete=ok;t.onerror=()=>no(t.error)})}catch(e){}};
 function photoKeys(x){if(Array.isArray(x&&x.phs)&&x.phs.length)return [...new Set(x.phs.map(String))];return x&&x.ph&&x.t?[String(x.t)]:[]}
 // Odstranění vybraných fotek u zapsaného přebytku (výběr klepnutím na fotky)
+// ===== Prohlížeč fotek na celou obrazovku: šipky nebo tažení prstem, klepnutím na fotku se přiblíží =====
+let pv=null;
+function pvClose(){if(!pv)return;if(pv.u)URL.revokeObjectURL(pv.u);pv.el.remove();pv=null}
+async function pvShow(i){if(!pv)return;const n=pv.g.length;if(i<0||i>=n)return;pv.i=i;const my=++pv.gen;let b=null;try{b=await pv.g[i]()}catch(e){}
+ if(!pv||my!==pv.gen)return;if(pv.u)URL.revokeObjectURL(pv.u);pv.u=b?URL.createObjectURL(b):null;pv.img.src=pv.u||'';pv.el.classList.remove('z');
+ pv.el.querySelector('.pvc').textContent=(i+1)+' / '+n+' · klepnutím na fotku přiblížíš';
+ pv.el.querySelector('.pvp').style.display=i>0?'':'none';pv.el.querySelector('.pvn').style.display=i<n-1?'':'none'}
+function pvOpen(g,i){if(pv||!g.length)return;const el=document.createElement('div');el.className='pv';el.setAttribute('role','dialog');el.setAttribute('aria-label','Fotka přebytku');
+ el.innerHTML='<div class="pvc"></div><img class="pvi" alt="Fotka přebytku"><button type="button" class="pvb pvp" aria-label="Předchozí">‹</button><button type="button" class="pvb pvn" aria-label="Další">›</button><button type="button" class="pvb pvx" aria-label="Zavřít">✕</button>';
+ pv={el,g,i:0,gen:0,u:null,img:el.querySelector('.pvi')};
+ el.querySelector('.pvp').onclick=()=>pvShow(pv.i-1);el.querySelector('.pvn').onclick=()=>pvShow(pv.i+1);el.querySelector('.pvx').onclick=pvClose;
+ let x0=null;el.addEventListener('touchstart',e=>{x0=e.touches.length===1?e.touches[0].clientX:null},{passive:true});
+ el.addEventListener('touchend',e=>{if(x0==null||el.classList.contains('z'))return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>60)pvShow(pv.i+(dx<0?1:-1))},{passive:true});
+ pv.img.onclick=()=>el.classList.toggle('z');el.addEventListener('click',e=>{if(e.target===el)pvClose()});
+ document.body.appendChild(el);pvShow(i)}
+function phView(im){const ks=[...im.parentElement.querySelectorAll('img[data-ph]')].map(x=>x.dataset.ph);pvOpen(ks.map(k=>()=>idbGet('ph'+k)),Math.max(0,ks.indexOf(im.dataset.ph)))}
+function phViewPending(i){const a=v.xphs||[];pvOpen(a.map(b=>()=>Promise.resolve(b)),Math.max(0,i))}
 function xBtns(x,n){const pd=v.pd&&v.pd.t===x.t;
  if(pd)return '<span class="span2"><button type="button" class="chip bad" id="pdb" onclick="pdDel()"'+(v.pd.sel.length?'':' disabled')+'>Odstranit vybrané ('+v.pd.sel.length+')</button><button type="button" class="chip" onclick="pdAll()">Vybrat vše</button><button type="button" class="chip" onclick="pdEnd()">Zrušit</button></span><span class="span2 mut sm">Klepni na fotky, které chceš odstranit.</span>';
  return '<span class="span2"><button type="button" class="chip" onclick="takeXh('+x.t+')">'+(n?'Přidat další fotku':'Přidat fotku')+'</button>'+(n?'<button type="button" class="chip" onclick="pdStart('+x.t+')">Odstranit fotky</button>':'')+'<input id="xf'+x.t+'" type="file" accept="image/*" capture="environment" hidden onchange="xShot(event,'+x.t+')"></span>'}
 function pdStart(t){v.pd={t:+t,sel:[]};render()}
 function pdEnd(){v.pd=null;render()}
 function pdSync(){const b=$('pdb');if(b&&v.pd){b.textContent='Odstranit vybrané ('+v.pd.sel.length+')';b.disabled=!v.pd.sel.length}}
-function phClick(im){const pd=v.pd;if(pd&&pd.t===+im.dataset.t){const k=im.dataset.ph,i=pd.sel.indexOf(k);if(i<0)pd.sel.push(k);else pd.sel.splice(i,1);im.classList.toggle('sel',i<0);pdSync();return}im.classList.toggle('big')}
+function phClick(im){const pd=v.pd;if(pd&&pd.t===+im.dataset.t){const k=im.dataset.ph,i=pd.sel.indexOf(k);if(i<0)pd.sel.push(k);else pd.sel.splice(i,1);im.classList.toggle('sel',i<0);pdSync();return}phView(im)}
 function pdAll(){const pd=v.pd,x=pd&&S.x.find(y=>y.t===pd.t);if(!x)return;const ks=photoKeys(x);pd.sel=pd.sel.length===ks.length?[]:ks.slice();render()}
 async function pdDel(){const pd=v.pd;if(!pd||!pd.sel.length)return;const x=S.x.find(y=>y.t===pd.t);if(!x){v.pd=null;render();return}
  if(!await askQ('Odstranit vybrané fotky?\n\nOdstraní se fotky přebytku '+fmt(x.n)+' (počet: '+pd.sel.length+'). Akci nelze vrátit.','Odstranit','Zrušit'))return;
@@ -747,8 +776,8 @@ async function pdDel(){const pd=v.pd;if(!pd||!pd.sel.length)return;const x=S.x.f
  x.phs=keep;x.ph=keep.length?1:0;x.mt=Date.now();v.pd=null;save();render();toast('Odstraněno fotografií: '+rm.size)}
 function delXPhotos(x){for(const k of photoKeys(x))idbDel('ph'+k)}
 async function appendXPhoto(t,b){const x=S.x.find(y=>y.t===t);if(!x)throw new Error('Přebytek nebyl nalezen');const keys=photoKeys(x),key=String(t)+'_'+Date.now()+'_'+(keys.length+1)+'_'+Math.random().toString(36).slice(2,8);await idbSetMany([['ph'+key,b]]);x.phs=[...keys,key];x.ph=1;x.mt=Date.now();save()}
-async function shrink(f){const b=await createImageBitmap(f),k=Math.min(1,1000/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);return await new Promise(ok=>c.toBlob(ok,'image/jpeg',.7))}
-function renderXPreviews(){const box=$('xpv');if(!box)return;const c=$('xpc');if(c)c.dataset.m='';box.innerHTML='';const a=v.xphs||[];box.style.display=a.length?'flex':'none';for(const b of a){const im=document.createElement('img');im.className='th';im.alt='Náhled fotografie přebytku';im.src=URL.createObjectURL(b);im.onload=()=>URL.revokeObjectURL(im.src);im.onclick=()=>{if(xpMode()){im.classList.toggle('sel');xpSync()}else im.classList.toggle('big')};box.appendChild(im)}xpcDraw()}
+async function shrink(f){const PX=+C.phpx||1000,b=await createImageBitmap(f),k=Math.min(1,PX/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);return await new Promise(ok=>c.toBlob(ok,'image/jpeg',PX>1000?.8:.7))}
+function renderXPreviews(){const box=$('xpv');if(!box)return;const c=$('xpc');if(c)c.dataset.m='';box.innerHTML='';const a=v.xphs||[];box.style.display=a.length?'flex':'none';for(const b of a){const im=document.createElement('img');im.className='th';im.alt='Náhled fotografie přebytku';im.src=URL.createObjectURL(b);im.onload=()=>URL.revokeObjectURL(im.src);im.onclick=()=>{if(xpMode()){im.classList.toggle('sel');xpSync()}else phViewPending([...box.children].indexOf(im))};box.appendChild(im)}xpcDraw()}
 function xpMode(){const c=$('xpc');return !!c&&c.dataset.m==='1'}
 function xpcDraw(){const c=$('xpc');if(!c)return;const n=(v.xphs||[]).length;if(!n)c.dataset.m='';c.style.display=n?'flex':'none';
  c.innerHTML=!n?'':c.dataset.m==='1'?'<button type="button" class="chip bad" id="xpd" onclick="xpDel()" disabled>Odstranit vybrané (0)</button><button type="button" class="chip" onclick="xpAll()">Vybrat vše</button><button type="button" class="chip" onclick="xpEnd()">Zrušit</button>':'<button type="button" class="chip" onclick="xpStart()">Odstranit fotky</button>';xpSync()}
@@ -788,7 +817,7 @@ async function takeXh(t){const pics=await shootPhoto();if(pics===false){const i=
 async function xShot(e,t){const f=e.target.files[0];e.target.value='';if(!f)return;try{await appendXPhoto(t,await shrink(f));render();toast('Fotka uložena')}catch(er){toast('Foto se nepodařilo zpracovat')}}
 async function loadPhotos(){const imgs=[...document.querySelectorAll('img[data-ph]')];if(!imgs.length)return;let d;try{d=await idb()}catch(e){imgs.forEach(im=>im.style.display='none');return}try{await new Promise(done=>{const tx=d.transaction('f','readonly'),store=tx.objectStore('f');for(const im of imgs){const q=store.get('ph'+im.dataset.ph);q.onsuccess=()=>{const b=q.result;if(b){const u=URL.createObjectURL(b);im.onload=()=>URL.revokeObjectURL(u);im.onerror=()=>{im.style.display='none';URL.revokeObjectURL(u)};im.src=u}else im.style.display='none'};q.onerror=()=>{im.style.display='none'}}tx.oncomplete=done;tx.onerror=done;tx.onabort=done})}finally{d.close()}}
 function logPush(e){e.w=Date.now();(S.log=S.log||[]).push(e);if(S.log.length>60)S.log.shift()}
-function undoToast(m){const t=$('toast');t.innerHTML=esc(m)+' <button class="ub" onclick="undoLast()">Vrátit</button>';t.classList.add('on');t.classList.add('act');clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('on');t.classList.remove('act')},(+C.ut>0?+C.ut:6)*1000)}
+function undoToast(m){const t=$('toast');t.innerHTML='<span class="tm">'+esc(m)+'</span><button class="ub" onclick="undoLast()">Vrátit</button>';t.classList.add('on');t.classList.add('act');clearTimeout(tt);tt=setTimeout(()=>{t.classList.remove('on');t.classList.remove('act')},(+C.ut>0?+C.ut:6)*1000)}
 function undoAt(i){const e=(S.log||[])[i];if(!e)return;const sc=v.sc;
  if(e.kind==='x'){const j=S.x.findIndex(y=>y.t===e.xt);if(j<0){toast('Přebytek už neexistuje');return}const x=S.x.splice(j,1)[0];delXPhotos(x)}
  else{const c=S.r[e.k];if(!c||c.t!==e.rt){toast('Záznam se mezitím změnil, použij Opravit');return}if(e.prev)S.r[e.k]=e.prev;else delete S.r[e.k]}
@@ -819,7 +848,7 @@ function sheetItem(){const d=D.find(x=>x.k===v.it),r0=S.r[d.k],r=r0&&r0.s!=='m'?
 
 function pickRow(d){return '<button class="row" onclick="openItem(\''+d.k+'\',true)"><span><span class="num idn">'+esc(fmt(d.id))+'</span>'+(d.dc>1?' <span class="mut sm">řádek '+d.dn+' z '+d.dc+'</span>':'')+'</span><span>'+pill(d)+'</span><span class="span2">'+esc(d.p)+'</span><span class="span2 mut sm">'+esc([d.sn?'S/N '+d.sn:'',d.b+(d.u?' · '+d.u:''),d.o].filter(Boolean).join(' · '))+'</span></button>'}
 function sheetScan(){const x=v.res,A=aimDims();let b;
- if(!x)b='<div class="two"><button class="btn pri" onclick="snap()">Vyfotit štítek</button><button class="btn" onclick="doScan()">Najít</button></div><input id="ph" type="file" accept="image/*" hidden onchange="photo(event)">';
+ if(!x)b='<div class="two"><button class="btn" onclick="snap()">Vyfotit štítek</button><button class="btn pri" onclick="doScan()">Najít</button></div><input id="ph" type="file" accept="image/*" hidden onchange="photo(event)">';
  else if(x.pick)b='<p class="warn">Číslo '+esc(fmt(x.n))+' je v evidenci vícekrát ('+x.dc+' řádky). Vyber, který kus právě eviduješ:</p>'+x.pick.map(pickRow).join('');
  else if(x.dup){const mm=x.dup.filter(d=>{const r=S.r[d.k];return r&&r.s==='m'}),ok=x.dup.length>mm.length;
   if(mm.length)b='<p class="warn">Štítek '+esc(fmt(x.n))+' byl dříve označen jako Nenalezeno.</p><p class="mut sm">Majetek se teď našel. Otevři záznam a změň ho na Nalezeno.</p>'+mm.map(d=>{const r=S.r[d.k];return pickRow(d)+'<p class="mut sm">Nenalezeno '+esc(new Date(r.t||0).toLocaleString('cs-CZ'))+(r.by?', '+esc(r.by):'')+(r.nt?': '+esc(r.nt):'')+'</p>'}).join('')+(ok?'<p class="mut sm">Jiný kus se stejným štítkem je už zaznamenaný. Pokud jde o další fyzický kus, zapiš ho jako přebytek.</p><button class="btn" onclick="addDup()">Zapsat další kus jako přebytek</button>':'')+'<button class="btn pri" style="margin-top:10px" onclick="rescan()">Skenovat dál</button>';
@@ -829,7 +858,7 @@ function sheetScan(){const x=v.res,A=aimDims();let b;
  return '<div class="scrim" onclick="if(event.target===this)closeS()"><div class="sheet" role="dialog" aria-label="Skenování"><div class="hd"><h2>Skenování štítku</h2><button class="xb" onclick="closeS()" aria-label="Zavřít">✕</button></div><div class="cw" id="cw" onclick="focusTap(event)"><video id="vid" playsinline muted></video><div class="aim'+(A.m==='full'?' full':'')+'" id="aim" style="width:'+Math.round(A.ww*100)+'%;height:'+Math.round(A.hh*100)+'%"></div><button class="tb" id="tb" onclick="event.stopPropagation();torch()">Svítilna</button></div><input id="zm" class="rg" type="range" style="display:none" oninput="setZoom(this.value)" aria-label="Zoom kamery"><button class="btn pri" id="cam" onclick="camOn()" style="display:none">Aktivovat kameru</button><p class="mut sm" id="cst"></p><p class="mut sm">Kamera čte kód sama. Namiř červenou čáru na kód z 15–25 cm a drž telefon v klidu. Když se kód nedaří načíst, zkus Vyfotit štítek: pořídí jeden snímek ve vyšším rozlišení.</p><input id="sn" class="in" inputmode="numeric" autocomplete="off" placeholder="Nebo zadej majetkové číslo" value="'+(x?esc(fmt(x.n)):'')+'" oninput="formatScanInput(this)" onkeydown="if(event.key===\'Enter\')doScan()">'+b+'</div></div>'}
 
 function render(){$('app').dataset.tab=v.tab;const p=v.tab==='sum'?pageSum():v.tab==='set'?pageSet():v.loc?pageLoc():pageHome();
- $('app').innerHTML=p+'<nav class="nav"><button class="'+(v.tab==='home'?'on':'')+'" onclick="tabHome()">INVENTURA</button><button class="'+(v.tab==='sum'?'on':'')+'" onclick="tabSum()">SOUHRN</button><button class="'+(v.tab==='set'?'on':'')+'" onclick="tabSet()" aria-label="Nastavení" title="Nastavení"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button><button onclick="quitApp()" aria-label="Ukončit aplikaci" title="Ukončit aplikaci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button></nav>'+(v.hist?sheetHist():v.it?sheetItem():v.sc?sheetScan():'')+(v.rs?sheetReset():'')+(v.nf?sheetNew():'');if(v.tab==='set')chkApk();if(v.tab==='set'||v.tab==='sum')enhSel();loadPhotos()}
+ $('app').innerHTML=p+'<nav class="nav"><button class="'+(v.tab==='home'?'on':'')+'" onclick="tabHome()">INVENTURA</button><button class="'+(v.tab==='sum'?'on':'')+'" onclick="tabSum()">SOUHRN</button><button class="'+(v.tab==='set'?'on':'')+'" onclick="tabSet()" aria-label="Nastavení" title="Nastavení"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button><button onclick="quitApp()" aria-label="Ukončit aplikaci" title="Ukončit aplikaci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button></nav>'+(v.hist?sheetHist():v.it?sheetItem():v.sc?sheetScan():'')+(v.rs?sheetReset():'')+(v.nf?sheetNew():'');if(v.tab==='set'){chkApk();chkStore();chkOffline()}if(v.tab==='set'||v.tab==='sum')enhSel();loadPhotos()}
 function go(l){v.tab='home';v.loc=l||null;v.f='';v.sf='';render();scrollTo(0,0)}
 function goAll(){v.tab='home';v.loc=ALL_LOC;v.f='';v.sf='';render();scrollTo(0,0)}
 let NB=false;const TST=[];
@@ -872,7 +901,7 @@ function swRows(d,r){
  const T=[['lab','Štítek je na místě'],['inv','Inventární stav'],['use','Majetek se používá']];
  if(d.q>1)return T.map(a=>'<div class="qty"><span>'+a[1]+'<br><span class="mut sm">u <b class="mq">'+v.q+'</b> napočtených ks</span></span><div><button class="btn sq" onclick="setM(\''+a[0]+'\',-1)" aria-label="Méně">−</button><b class="num" id="m_'+a[0]+'">'+v.m[a[0]]+'</b><button class="btn sq" onclick="setM(\''+a[0]+'\',1)" aria-label="Více">+</button></div></div>').join('');
  return T.map(a=>{const on=a[0]==='inv'?r.inv!==false:!!r[a[0]];return '<label class="sw"><span>'+a[1]+'</span><input id="'+a[0]+'" type="checkbox"'+(on?' checked':'')+'></label>'}).join('')}
-function mark(s){const id=v.it,d=D.find(x=>x.k===id);const isFullQty=s==='m'||d.q<=1||v.q>=d.q;
+function mark(s){if(!norm(S.who)){needName(()=>mark(s));return}const id=v.it,d=D.find(x=>x.k===id);const isFullQty=s==='m'||d.q<=1||v.q>=d.q;
  const fl=k=>d.q>1?(s==='f'&&v.q>0&&v.m[k]>=v.q):(s==='f'&&$(k).checked);
  if(!S.t0)S.t0=Date.now();const prev=S.r[id]?JSON.parse(JSON.stringify(S.r[id])):null;S.r[id]={s:isFullQty?s:'f',q:s==='m'?0:v.q,lab:fl('lab'),inv:fl('inv'),use:fl('use'),...(d.q>1?{nl:s==='f'?v.m.lab:0,ni:s==='f'?v.m.inv:0,nu:s==='f'?v.m.use:0}:{}),lc:s==='m'?'':$('lc').value,nt:$('nt').value,t:Date.now(),by:S.who||''};
  logPush({kind:'r',k:id,id:d.id,p:d.p,s,rt:S.r[id].t,prev});
@@ -910,7 +939,7 @@ function doScan(){
 function addExtra(){const d=D.find(x=>x.k===v.it);if(!d)return;const t=Date.now(),p='Kus navíc: '+d.p;S.x.push({n:d.id,p,l:v.by==='b'?v.loc:'',g:v.by+v.loc,t,by:S.who||''});logPush({kind:'x',xt:t,id:d.id,p});save();beep('ok');toast('Kus navíc zapsán jako Přebytek: '+fmt(d.id))}
 function addDup(){const d=v.res.dup.find(z=>!(S.r[z.k]&&S.r[z.k].s==='m'))||v.res.dup[0],t=Date.now();S.x.push({n:d.id,p:'Duplicita: '+d.p,l:v.by==='b'?v.loc:'',g:v.by+v.loc,t,by:S.who||''});logPush({kind:'x',xt:t,id:d.id,p:'Duplicita: '+d.p});save();closeS();undoToast('Další kus zapsán jako přebytek: '+fmt(d.id))}
 function rescan(){v.xph=null;v.xphs=[];v.res=null;render();setTimeout(camOn,60)}
-async function addX(){const t=Date.now(),pics=[...(v.xphs||[])],x={n:v.res.n,p:$('xp').value,l:v.by==='b'?v.loc:'',g:v.by+v.loc,t,by:S.who||''};
+async function addX(){if(!norm(S.who)){needName(()=>addX());return}const t=Date.now(),pics=[...(v.xphs||[])],x={n:v.res.n,p:$('xp').value,l:v.by==='b'?v.loc:'',g:v.by+v.loc,t,by:S.who||''};
  if(pics.length){x.phs=pics.map((b,i)=>String(t)+'_'+(i+1)+'_'+Math.random().toString(36).slice(2,7));x.ph=1;try{await idbSetMany(pics.map((b,i)=>['ph'+x.phs[i],b]));const d=await idb(),found=await new Promise((ok,no)=>{const tx=d.transaction('f','readonly'),o=tx.objectStore('f'),out=[];for(const k of x.phs){const q=o.get('ph'+k);q.onsuccess=()=>out.push(!!q.result);q.onerror=()=>no(q.error)}tx.oncomplete=()=>ok(out.filter(Boolean).length);tx.onerror=()=>no(tx.error)});d.close();if(found!==pics.length)throw new Error('Uloženo '+found+' z '+pics.length+' fotografií')}catch(e){toast('Fotografie se nepodařilo úplně uložit ('+pics.length+' snímků). Přebytek zatím nebyl zapsán.');return}}
  v.xph=null;v.xphs=[];S.x.push(x);logPush({kind:'x',xt:t,id:x.n,p:x.p||'Přebytek'});save();closeS();undoToast('Přebytek zapsán: '+fmt(x.n)+(pics.length?' · fotografie: '+pics.length:''))}
 function reset(){v.rs=true;render()}
@@ -1074,12 +1103,51 @@ async function camTestOpen(){
  if(!cameraOptions.length){toast('Nejdřív klepni na Otestovat dostupné kamery');return}
  camOff();
  const el=document.createElement('div');el.className='scrim csp';el.style.alignItems='center';el.style.zIndex=48;
- el.innerHTML='<div class="sheet" role="dialog" aria-label="Zkouška čtení kamerou" style="max-width:420px;width:calc(100% - 32px);border-radius:12px"><h2>Zkouška čtení</h2><p class="mut sm">Namiř kameru na štítek a sleduj, jak rychle a jak často ho přečte. Přepínáním kamer je porovnáš. Čísla ovlivňuje i vzdálenost a světlo, měř vždy stejně.</p><video playsinline muted style="display:block;width:100%;height:200px;object-fit:cover;background:#000;border-radius:8px;margin:8px 0"></video><div class="chips" id="ctl"></div><p class="sm" id="cts"></p><div class="two"><button class="btn" type="button" id="ctz">Vynulovat měření</button><button class="btn pri" type="button" id="ctu">Použít tuto kameru</button></div><button class="btn" type="button" id="ctc" style="margin-top:10px">Zavřít</button></div>';
+ el.innerHTML='<div class="sheet" role="dialog" aria-modal="true" aria-label="Zkouška čtení kamerou" style="max-width:420px;width:calc(100% - 32px);border-radius:12px;padding:22px 20px 20px;max-height:92vh;overflow:auto"><h2 style="margin:0 0 10px">Zkouška čtení</h2><p class="mut sm" style="margin:0 0 14px;line-height:1.45">Namiř kameru na štítek a sleduj, jak rychle a jak často ho přečte. Přepínáním kamer je porovnáš. Měř vždy ze stejné vzdálenosti a při stejném světle.</p><video playsinline muted style="display:block;width:100%;height:200px;object-fit:cover;background:#000;border-radius:10px;margin:0 0 14px"></video><div class="chips" id="ctl" style="display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px"></div><p class="sm" id="cts" style="margin:0 0 16px;line-height:1.45;min-height:2.9em"></p><div class="two" style="gap:10px"><button class="btn" type="button" id="ctz">Vynulovat měření</button><button class="btn pri" type="button" id="ctu">Použít tuto kameru</button></div><button class="btn" type="button" id="ctc" style="margin-top:10px">Zavřít</button></div>';
  ct={el,gen:0,id:C.deviceId||'',s:null,vid:el.querySelector('video'),reads:0,first:null,last:'',res:'',t0:Date.now(),tm:0};
  el.addEventListener('click',e=>{if(e.target===el)camTestClose()});
  el.querySelector('#ctc').onclick=camTestClose;el.querySelector('#ctz').onclick=ctReset;
  el.querySelector('#ctu').onclick=()=>{const id=ct.id;setCameraDevice(id);camTestClose();render();toast(id?'Kamera uložena':'Nastavena automatická kamera')};
  document.body.appendChild(el);ctChips();ctStart(ct.id)}
+// ===== Stav úložiště a offline provozu (Nastavení) =====
+async function chkStore(){const e=$('stg');if(!e)return;
+ try{const p=navigator.storage&&navigator.storage.persisted?await navigator.storage.persisted():null;let u='';
+  if(navigator.storage&&navigator.storage.estimate){const q=await navigator.storage.estimate();u=' Využito '+((q.usage||0)/1048576).toFixed(1).replace('.',',')+' MB'+(q.quota?' z asi '+Math.round(q.quota/1048576)+' MB':'')+'.'}
+  const e2=$('stg');if(!e2)return;
+  e2.innerHTML=(p===true?'Trvalé úložiště je zapnuto, systém data sám nesmaže.':p===false?'Trvalé úložiště není zapnuto. Při nedostatku místa může telefon data aplikace smazat, proto pravidelně ukládej zálohu.':'Stav trvalého úložiště nelze zjistit.')+esc(u)+(p===false?'<br><button class="btn" style="margin-top:8px" type="button" onclick="askPersist()">Požádat o trvalé úložiště</button>':'')}
+ catch(x){const e3=$('stg');if(e3)e3.textContent='Stav úložiště se nepodařilo zjistit.'}}
+async function askPersist(){try{const ok=await navigator.storage.persist();toast(ok?'Trvalé úložiště zapnuto':'Telefon trvalé úložiště nepovolil')}catch(e){toast('Požadavek se nepodařil')}chkStore()}
+async function chkOffline(){const e=$('ofl');if(!e)return;
+ try{
+  if(!('caches' in window)){e.textContent='Offline provoz: tento způsob spuštění neumožňuje ověřit uložené soubory.';return}
+  const need=['xlsx.full.min.js','zxing.min.js','inventura.json','icon.svg'],miss=[];
+  try{if(!(await caches.match(new Request(location.href.split('#')[0]))))miss.push('stránka aplikace')}catch(x){}
+  for(const f of need){try{if(!(await caches.match(f)))miss.push(f)}catch(x){miss.push(f)}}
+  const sw=navigator.serviceWorker&&navigator.serviceWorker.controller,e2=$('ofl');if(!e2)return;
+  e2.textContent='Offline provoz: '+(!sw?'servisní worker tuto stránku zatím neřídí (po prvním načtení a restartu aplikace se aktivuje).':miss.length?'v offline cache chybí: '+miss.join(', ')+'. Doplň je do seznamu souborů v sw.js.':'v pořádku, všechny kontrolované soubory jsou uložené.')}
+ catch(x){const e3=$('ofl');if(e3)e3.textContent='Offline provoz se nepodařilo ověřit.'}}
+function showSkipped(){const el=document.createElement('div');el.className='scrim';el.style.alignItems='center';el.style.zIndex=40;
+ el.innerHTML='<div class="sheet" role="dialog" aria-modal="true" style="max-width:480px;width:calc(100% - 32px);border-radius:12px;padding:22px 20px 20px;max-height:85vh;overflow:auto"><h2 style="margin:0 0 10px">Přeskočené řádky ('+SK.length+')</h2><p class="mut sm" style="margin:0 0 12px;line-height:1.45">V těchto řádcích není v sloupci Majetkové číslo číslo o 6 a více číslicích, proto se nedají skenovat ani hledat. Čísla řádků odpovídají řádkům v Excelu.</p>'+SK.slice(0,300).map(s=>'<div style="padding:8px 0;border-top:1px solid var(--line)"><b class="num">řádek '+s.r+'</b> · '+esc(s.id)+(s.p?'<br><span class="mut sm">'+esc(s.p)+'</span>':'')+'</div>').join('')+(SK.length>300?'<p class="mut sm">Zobrazeno prvních 300 řádků.</p>':'')+'<button class="btn pri" type="button" style="margin-top:16px" id="skc">Zavřít</button></div>';
+ el.addEventListener('click',e=>{if(e.target===el||e.target.id==='skc')el.remove()});document.body.appendChild(el)}
+// Jméno se vyžaduje až před prvním zápisem, aby šlo aplikaci otevřít a prohlížet bez překážek
+function needName(cb){const el=document.createElement('div');el.className='scrim';el.style.alignItems='center';el.style.zIndex=60;
+ el.innerHTML='<div class="sheet" role="dialog" aria-modal="true" style="max-width:420px;width:calc(100% - 32px);border-radius:12px;padding:22px 20px 20px"><h2 style="margin:0 0 10px">Zadej své jméno</h2><p class="mut sm" style="margin:0 0 12px;line-height:1.45">Jméno se zapíše ke každému záznamu a do sloupce Inventuru provedl. Podle něj se rozliší zápisy z více telefonů. Později ho změníš na kartě Souhrn.</p><input class="in" id="nmq" placeholder="Tvoje jméno" autocomplete="name" style="margin:0 0 14px"><div class="two" style="gap:10px"><button class="btn" type="button" id="nmc">Zrušit</button><button class="btn pri" type="button" id="nmo">Pokračovat</button></div></div>';
+ const inp=el.querySelector('#nmq'),go=()=>{const n=norm(inp.value);if(!n){inp.focus();return}S.who=n;save();tagAuth();el.remove();cb()};
+ el.querySelector('#nmo').onclick=go;el.querySelector('#nmc').onclick=()=>el.remove();inp.addEventListener('keydown',e=>{if(e.key==='Enter')go()});
+ el.addEventListener('click',e=>{if(e.target===el)el.remove()});document.body.appendChild(el);inp.focus()}
+// Fotky přebytků jako běžné soubory JPG v jednom ZIPu (včetně přehledu v CSV), aby šly otevřít i na počítači
+async function exportPhotos(){
+ const ents=[],rows=[['Soubor','Číslo ze štítku','Popis','Budova','Provedl','Datum']],used=new Set();let n=0;
+ toast('Připravuji ZIP s fotkami…');
+ for(const x of S.x){let i=0;for(const k of photoKeys(x)){let b=null;try{b=await idbGet('ph'+k)}catch(e){}if(!b)continue;i++;
+  let f='Prebytek_'+String(x.n).replace(/[^\p{L}\p{N}]+/gu,'_')+'_'+i+'.jpg';while(used.has(f))f=f.replace(/\.jpg$/,'_'+(++n)+'.jpg');used.add(f);
+  ents.push(xpBin(f,new Uint8Array(await b.arrayBuffer())));rows.push([f,x.n,x.p||'',x.l||'',x.by||'',new Date(x.t||Date.now()).toLocaleDateString('cs-CZ')])}}
+ if(!ents.length){toast('Žádné fotky k uložení');return}
+ ents.push(xpEnt('prehled.csv','\ufeff'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\r\n')));
+ const day=new Date().toISOString().slice(0,10),who=norm(S.who)?norm(S.who).replace(/[^\p{L}\p{N}]+/gu,'_')+'_':'';
+ const where=await saveFile(xpZip(ents,'application/zip'),'Inventura_foto_'+who+day+'.zip');
+ if(where===false){toast('Fotky se nepodařilo uložit');return}
+ toast('Fotky uloženy ('+(ents.length-1)+')'+(typeof where==='string'?': '+where:''))}
 async function torch(){try{tOn=!tOn;await track.applyConstraints({advanced:[{torch:tOn}]})}catch(e){tOn=false;toast('Svítilnu se nepodařilo zapnout')}}
 function pauseCam(){camOff();const cb=$('cam'),cw=$('cw'),st=$('cst'),zm=$('zm'),tb=$('tb');if(cw)cw.style.display='none';if(zm)zm.style.display='none';if(tb)tb.style.display='none';if(cb)cb.style.display='block';if(st)st.textContent='Kamera se po 2 minutách pozastavila, aby šetřila baterii. Klepni na Aktivovat kameru.'}
 function camOff(){camTok++;loopId++;clearTimeout(tm);clearInterval(tm);if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;track=null;tOn=false;unwake()}
@@ -1131,6 +1199,7 @@ function openSel(sel,btn){
  document.body.appendChild(el);if(cur){cur.scrollIntoView({block:'center'});cur.focus()}}
 // ===== Tlačítko Zpět vždy vrací o krok a aplikaci nezavře =====
 function backStep(){
+ if(pv){pvClose();return}
  if(ct){camTestClose();return}
  if(shoot){shoot.close(null);return}
  const dlg=document.querySelector('body > .scrim');
