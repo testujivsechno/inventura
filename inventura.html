@@ -154,6 +154,8 @@ select.in{margin-bottom:4px}
 .cw video{display:block;margin:0;width:100%;max-height:var(--camh,340px)}
 .aim{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border:2px solid var(--acc);border-radius:8px;box-shadow:0 0 0 999px rgba(0,0,0,.38);pointer-events:none}
 .aim.full{border-color:transparent;box-shadow:none}
+.fr{position:absolute;width:60px;height:60px;margin:-30px 0 0 -30px;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.45);pointer-events:none;animation:frp .7s ease-out forwards;z-index:3}
+@keyframes frp{from{transform:scale(1.5);opacity:1}to{transform:scale(.85);opacity:0}}
 .aim::after{content:"";position:absolute;left:4%;right:4%;top:50%;height:2px;margin-top:-1px;background:#ff2b2b;box-shadow:0 0 8px 2px rgba(255,43,43,.75);animation:ln 1s ease-in-out infinite alternate}
 @keyframes ln{from{opacity:.5}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.aim::after{animation:none}}
@@ -195,12 +197,14 @@ const idText=value=>{
  return (neg?'-':'')+out;
 };
 const KEY='inv-v1';let S={r:{},x:[],who:''};try{S=Object.assign(S,JSON.parse(localStorage.getItem(KEY)))}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+let storeBad=false,storeWarnT=0;
+function storeFail(){storeBad=true;const n=Date.now();if(n-storeWarnT<15000)return;storeWarnT=n;try{toast('Uložení do telefonu selhalo. Nejdřív ulož zálohu (karta Souhrn).',7000)}catch(e){}}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));storeBad=false;return true}catch(e){storeFail();return false}};
 const CK='inv-cfg-v1';let C={snd:true,vib:true,fs:1,bs:1,cs:1,fm:['code_128','code_39','ean_13','ean_8','itf','codabar','qr_code'],ar:'band',cf:2,val:true,vol:.6,theme:'dark',accent:'daikin',uni:false,stick:true,zf:false,dir:'Download/Inventura',wake:true,bkOn:true,bkN:20,bkM:60,auto:false,bkQuit:true,ut:6,cam:'m',group:4,showO:true,showAll:true,showB:false};try{C=Object.assign(C,JSON.parse(localStorage.getItem(CK)))}catch(e){}
 for(const k of ['fs','bs','cs']){C[k]=Math.min(1.3,Math.max(.7,+C[k]||1))}
 if(!Array.isArray(C.fm)||!C.fm.length)C.fm=['code_128','code_39','ean_13','ean_8','itf','codabar','qr_code'];
 if(!Number.isInteger(+C.group)||+C.group<0||+C.group>12)C.group=4; C.group=+C.group;
-const saveC=()=>{try{localStorage.setItem(CK,JSON.stringify(C))}catch(e){}};
+const saveC=()=>{try{localStorage.setItem(CK,JSON.stringify(C));return true}catch(e){storeFail();return false}};
 // Barvy tlačítek a zvýraznění: [název, světlý motiv, tmavý motiv]. Barvu textu na tlačítku vybere program podle jasu.
 const ACC={daikin:['Daikin modrá','#0097E0','#0097E0'],grey:['Šedá','#6B7686','#8D99AB'],purple:['Fialová','#6A3FA0','#A57BE0'],red:['Červená','#C62828','#E8554B'],orange:['Oranžová','#EF6C00','#FF9A2E'],yellow:['Žlutá','#FFC400','#FFC400'],green:['Zelená','#1F8F52','#3DBE78'],lblue:['Světlá modrá','#4FC3F7','#4FC3F7']};
 if(!C.accV){C.accent='daikin';C.accV=1}
@@ -217,7 +221,7 @@ function applyTheme(){
 }
 function applyCfg(){const de=document.documentElement,st=de.style;applyTheme();st.setProperty('--fs',C.fs);st.setProperty('--bs',C.bs);st.setProperty('--cs',C.cs);st.setProperty('--camh',({s:'240px',m:'340px',l:'min(58vh,480px)'})[C.cam]||'340px')}
 applyCfg();
-let WB,WS,COL={},D=[],locs=[],FN='',v={by:'o',sf:'',sn:'',tab:'home',loc:null,it:null,sc:false,res:null,q:0,f:'',fs:false,rs:false},tt;
+let SRC=null,SHN='',HR=0,RO=0,CO=0,WB,WS,COL={},D=[],locs=[],FN='',v={by:'o',sf:'',sn:'',tab:'home',loc:null,it:null,sc:false,res:null,q:0,f:'',fs:false,rs:false},tt;
 
 const stat=d=>{const r=S.r[d.k];if(!r)return 'c';if(r.s==='m')return 'm';if(d.q>1&&(r.q||0)<d.q)return 'p';return 'f'};
 const isDone=d=>{const s=stat(d);return s==='f'||s==='m'};
@@ -254,7 +258,7 @@ const done=l=>inLoc(l).filter(d=>isDone(d)).length;
 const bar=(a,b)=>'<div class="bar"><i style="width:'+(b?a/b*100:0)+'%"></i></div>';
 // const pill=d=>{const s=stat(d);return s==='f'?'<span class="pill f">Nalezeno</span>':s==='m'?'<span class="pill m">Nenalezeno</span>':s==='p'?'<span class="pill m">Nedokončeno</span>':'<span class="pill">Zbývá</span>'};
 const pill=d=>{const s=stat(d);return s==='f'?'<span class="pill f">Nalezeno</span>':s==='m'?'<span class="pill m">Nenalezeno</span>':s==='p'?'<span class="pill m">Nedokončeno</span>':'<span class="pill"></span>'};
-function toast(m){const t=$('toast');t.classList.remove('act');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2500)}
+function toast(m,ms){const t=$('toast');t.classList.remove('act');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),ms||2500)}
 async function pick(e){const f=e.target.files[0];if(!f)return;
  try{const buf=await f.arrayBuffer(),prev=D.length?await idbGet('file'):null,oldKeys=Object.keys(S.r);
   if(load(buf,f.name)){if(D.length)idbSet('file',{buf,name:f.name});checkNew(oldKeys,prev)}
@@ -272,10 +276,10 @@ function nfCancel(){const p=v.nf&&v.nf.prev;v.nf=null;
 function sheetNew(){const n=v.nf,bad=n.total-n.match;
  return '<div class="scrim"><div class="sheet" role="alertdialog" aria-label="Výsledky nesedí k novému souboru"><div class="hd"><h2>Výsledky nesedí k souboru</h2></div><p>V telefonu je uloženo <b>'+n.total+'</b> záznamů o položkách a <b>'+n.x+'</b> přebytků. V souboru <b>'+esc(n.name)+'</b> odpovídá majetkovým číslům <b>'+n.match+'</b> záznamů, zbývajících <b>'+bad+'</b> k žádné položce nepatří.'+(n.match===0?' Vypadá to, že jde o jinou inventuru.':'')+'</p><button class="btn" onclick="backup()">Nejdřív uložit zálohu (JSON)</button><button class="btn pri" style="margin-top:10px" onclick="nfKeep()">Zachovat výsledky</button><p class="mut sm">Záznamy, které k souboru nepatří, zůstanou uložené, ale nezobrazí se u žádné položky.</p><button class="btn bad" onclick="nfDel()">Smazat výsledky a začít znovu</button><p class="mut sm">Smaže všech '+n.total+' záznamů i přebytky. Akci nelze vrátit.</p><button class="btn" onclick="nfCancel()">Zrušit načtení souboru</button></div></div>'}
 function load(buf,name){
- WB=XLSX.read(buf,{type:'array'});const sn=WB.SheetNames.find(n=>/inventory/i.test(n))||WB.SheetNames[0];WS=WB.Sheets[sn];
+ WB=XLSX.read(buf,{type:'array'});const sn=WB.SheetNames.find(n=>/inventory/i.test(n))||WB.SheetNames[0];WS=WB.Sheets[sn];SRC=buf;SHN=sn;{const rg=XLSX.utils.decode_range(WS['!ref']||'A1');RO=rg.s.r;CO=rg.s.c}
  const A=XLSX.utils.sheet_to_json(WS,{header:1,defval:'',raw:true});
  const hr=A.findIndex(r=>r.some(c=>norm(c).toLowerCase().startsWith('majetkové č')));
- if(hr<0){toast('V souboru chybí sloupec Majetkové číslo');return false}
+ if(hr<0){toast('V souboru chybí sloupec Majetkové číslo');return false}HR=hr;
  const H=A[hr].map(c=>norm(c).toLowerCase()),f=re=>H.findIndex(h=>re.test(h));
  COL={id:f(/^majetkové č/),p:f(/^popis$/),d:f(/^další popis/),sn:f(/^výrobní/),q:f(/^množství/),u:f(/^detail umíst/),b:f(/^budova/),o:f(/^odpovědn/),ks:f(/^ks$/),lab:f(/^štítek/),st:f(/inven.*stav/),use:f(/používán/),nt:f(/^interní pozn/),dt:f(/^datum inventury/),by:f(/^inventuru prov/),note:f(/^poznámky/)};
  D=[];let skipped=0;const seen={};A.forEach((r,i)=>{
@@ -338,7 +342,8 @@ function setDir(x){C.dir=cleanDir(x);saveC();const e=$('dir');if(e)e.value=C.dir
  if(hasNat('saveFileTo')&&C.dir&&!/^Download(\/|$)/.test(C.dir))toast('Přímo lze ukládat jen do Download/… Jiná cesta znamená okno Uložit jako.')}
 function resetDir(){C.dir=DIR_DEF;saveC();if(canPickDir()){dirHandle=null;idbSet('dir',null)}render();toast('Výchozí nastavení složky obnoveno')}
 async function pickDir(){try{const h=await window.showDirectoryPicker({id:'inventura',mode:'readwrite',startIn:'downloads'});dirHandle=h;await idbSet('dir',h);render();toast('Složka vybrána: '+h.name)}catch(e){}}
-const unsaved=()=>Math.max(0,D.filter(isDone).length-(S.bk?S.bk.n:0))+Math.max(0,S.x.length-(S.bk&&S.bk.x||0));
+// Počítá všechny záznamy změněné po poslední záloze (i opravy už zapsaných položek a přidané fotky)
+const unsaved=()=>{const t0=S.bk?S.bk.t:0;let n=0;for(const k in S.r){const r=S.r[k];if(r&&(r.t||0)>t0)n++}for(const x of S.x)if(((x.mt||x.t)||0)>t0)n++;return n};
 const markSaved=()=>{S.bk={t:Date.now(),n:D.filter(isDone).length,x:S.x.length};save()};
 const bkInfo=()=>S.bk?'Poslední záloha nebo export: '+new Date(S.bk.t).toLocaleString('cs-CZ')+'. Od té doby zpracováno '+unsaved()+' položek.':'Záloha zatím nebyla uložena.';
 const blobUrl=b=>new Promise(ok=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=()=>ok(null);r.readAsDataURL(b)});
@@ -390,15 +395,112 @@ function beep(type='ok',nv){
 const mcNote=(d,r)=>{if(!(d.q>1)||r.nl==null||!r.q)return '';return [['Štítek',r.nl],['Inventární stav',r.ni],['Používá se',r.nu]].filter(a=>a[1]<r.q).map(a=>a[0]+' '+a[1]+'/'+r.q).join('; ')};
 const STX={f:'nalezeno',m:'nenalezeno',p:'částečně',c:'nezpracováno'};
 function dupNote(d){if(!(d.dc>1))return '';const o=D.filter(x=>x.id===d.id&&x!==d).map(x=>'ř. '+(x.ri+1)+' '+STX[stat(x)]).join(', ');return 'Duplicitní číslo '+d.dn+'/'+d.dc+(stat(d)==='c'?' (nespárováno)':' (spárováno)')+'; ostatní řádky: '+o}
+// ===== Zápis výsledků přímo do původního xlsx: upraví se jen XML buněk, formátování zůstane =====
+const xpTD=new TextDecoder(),xpTE=new TextEncoder();
+const xpCrcT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function xpCrc(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=xpCrcT[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
+async function xpInflate(u8){const ds=new DecompressionStream('deflate-raw'),w=ds.writable.getWriter();w.write(u8);w.close();return new Uint8Array(await new Response(ds.readable).arrayBuffer())}
+function xpUnzip(buf){const u=buf instanceof Uint8Array?buf:new Uint8Array(buf),dv=new DataView(u.buffer,u.byteOffset,u.byteLength);
+ let e=u.length-22;while(e>=0&&dv.getUint32(e,true)!==0x06054b50)e--;if(e<0)throw new Error('zip: konec nenalezen');
+ const n=dv.getUint16(e+10,true);let p=dv.getUint32(e+16,true);const ents=[];
+ for(let i=0;i<n;i++){if(dv.getUint32(p,true)!==0x02014b50)throw new Error('zip: adresář');
+  const fl=dv.getUint16(p+8,true),me=dv.getUint16(p+10,true),tm=dv.getUint16(p+12,true),dt=dv.getUint16(p+14,true),crc=dv.getUint32(p+16,true),cs=dv.getUint32(p+20,true),us=dv.getUint32(p+24,true),nl=dv.getUint16(p+28,true),el=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lo=dv.getUint32(p+42,true);
+  if(cs===0xFFFFFFFF||us===0xFFFFFFFF||lo===0xFFFFFFFF)throw new Error('zip64');
+  const nb=u.slice(p+46,p+46+nl),name=xpTD.decode(nb),ds=lo+30+dv.getUint16(lo+26,true)+dv.getUint16(lo+28,true);
+  ents.push({name,nb,fl,me,tm,dt,crc,cs,us,raw:u.subarray(ds,ds+cs)});p+=46+nl+el+cl}
+ return ents}
+function xpZip(ents,mime){const parts=[],cd=[];let off=0;
+ for(const e of ents){const fl=e.fl&0x0800,lh=new Uint8Array(30+e.nb.length),dv=new DataView(lh.buffer);
+  dv.setUint32(0,0x04034b50,true);dv.setUint16(4,20,true);dv.setUint16(6,fl,true);dv.setUint16(8,e.me,true);dv.setUint16(10,e.tm,true);dv.setUint16(12,e.dt,true);dv.setUint32(14,e.crc,true);dv.setUint32(18,e.cs,true);dv.setUint32(22,e.us,true);dv.setUint16(26,e.nb.length,true);lh.set(e.nb,30);
+  const ch=new Uint8Array(46+e.nb.length),cv=new DataView(ch.buffer);
+  cv.setUint32(0,0x02014b50,true);cv.setUint16(4,20,true);cv.setUint16(6,20,true);cv.setUint16(8,fl,true);cv.setUint16(10,e.me,true);cv.setUint16(12,e.tm,true);cv.setUint16(14,e.dt,true);cv.setUint32(16,e.crc,true);cv.setUint32(20,e.cs,true);cv.setUint32(24,e.us,true);cv.setUint16(28,e.nb.length,true);cv.setUint32(42,off,true);ch.set(e.nb,46);
+  parts.push(lh,e.raw);cd.push(ch);off+=lh.length+e.raw.length}
+ let cds=0;for(const c of cd)cds+=c.length;
+ const end=new Uint8Array(22),ev=new DataView(end.buffer);ev.setUint32(0,0x06054b50,true);ev.setUint16(8,ents.length,true);ev.setUint16(10,ents.length,true);ev.setUint32(12,cds,true);ev.setUint32(16,off,true);
+ return new Blob([...parts,...cd,end],{type:mime||'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})}
+const xpEnt=(name,str)=>{const b=xpTE.encode(str);return {name,nb:xpTE.encode(name),fl:0x800,me:0,tm:0,dt:33,crc:xpCrc(b),cs:b.length,us:b.length,raw:b}};
+const xpXe=s=>String(s==null?'':s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const xpUn=s=>String(s).replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&amp;/g,'&');
+const xpCol=n=>{let s='';n++;while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=Math.floor((n-1)/26)}return s};
+const xpColI=s=>{let n=0;for(const ch of s)n=n*26+ch.charCodeAt(0)-64;return n-1};
+// Styly: potřebujeme formát data u buněk s datem a tučné písmo v hlavičce nových listů
+function xpStyles(xml){
+ const m=/<cellXfs\b[^>]*>([\s\S]*?)<\/cellXfs>/.exec(xml);if(!m)throw new Error('styles: cellXfs');
+ const st={xml,xfs:m[1].match(/<xf\b[^>]*?(?:\/>|>[\s\S]*?<\/xf>)/g)||[],cache:{},fmts:{},dirty:false};
+ {const re=/<numFmt\b[^>]*?numFmtId="(\d+)"[^>]*?formatCode="([^"]*)"/g;let q;while((q=re.exec(xml)))st.fmts[q[1]]=q[2]}
+ const base0='<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>';
+ st.add=x=>{st.xfs.push(x);st.dirty=true;return st.xfs.length-1};
+ st.isDate=s=>{const x=st.xfs[s==null?0:s];if(!x)return false;const id=+((/numFmtId="(\d+)"/.exec(x)||[])[1]||0);return (id>=14&&id<=22)||(id>=45&&id<=47)||(id>=164&&/[dy]/i.test(st.fmts[id]||''))};
+ st.dateOf=s=>{const k=s==null?'n':s;if(st.cache[k]!=null)return st.cache[k];if(st.isDate(s))return st.cache[k]=(s==null?0:s);
+  const b=st.xfs[s==null?0:s]||base0;
+  return st.cache[k]=st.add(b.replace(/\snumFmtId="\d+"/,'').replace(/\sapplyNumberFormat="\d"/,'').replace(/^<xf\b/,'<xf numFmtId="14" applyNumberFormat="1"'))};
+ st.bold=()=>{if(st.cache.b!=null)return st.cache.b;const fm=/(<fonts\b[^>]*?count=")(\d+)("[^>]*>)/.exec(st.xml);if(!fm)throw new Error('styles: fonts');
+  const id=+fm[2];st.xml=st.xml.replace(fm[0],fm[1]+(id+1)+fm[3]).replace('</fonts>','<font><b/><sz val="11"/><name val="Calibri"/></font></fonts>');
+  return st.cache.b=st.add('<xf numFmtId="0" fontId="'+id+'" fillId="0" borderId="0" xfId="0" applyFont="1"/>')};
+ st.out=()=>st.xml.replace(/(<cellXfs\b[^>]*?)count="\d+"([^>]*>)[\s\S]*?<\/cellXfs>/,(a,p,q)=>p+'count="'+st.xfs.length+'"'+q+st.xfs.join('')+'</cellXfs>');
+ return st}
+// Úprava existujícího listu: upd = [{ri,c,k:'s'|'d',v}], ri = číslo řádku od 0, c = sloupec od 0, hr = řádek hlavičky od 0
+function xpPatch(xml,upd,hr,st){
+ const byRow=new Map();for(const u of upd){let m=byRow.get(u.ri);if(!m)byRow.set(u.ri,m=new Map());m.set(u.c,u)}
+ const cellRe=/<c\b[^>]*?(?:\/>|>[\s\S]*?<\/c>)/g,rowRe=/<row\b([^>]*?)(?:\/>|>([\s\S]*?)<\/row>)/g,colS={};
+ xml.replace(rowRe,(mm,attrs,inner)=>{const rn=+((/\br="(\d+)"/.exec(attrs)||[])[1]||0);if(rn-1<=hr)return mm;
+  for(const x of (inner||'').match(cellRe)||[]){const s=/\bs="(\d+)"/.exec(x),c=/\br="([A-Z]+)\d+"/.exec(x);if(s&&c){const ci=xpColI(c[1]);if(colS[ci]==null)colS[ci]=+s[1]}}return mm});
+ const seen=new Set();
+ xml=xml.replace(rowRe,(mm,attrs,inner)=>{const rn=+((/\br="(\d+)"/.exec(attrs)||[])[1]||0),mp=byRow.get(rn-1);if(!mp)return mm;seen.add(rn-1);
+  const arr=((inner||'').match(cellRe)||[]).map(x=>({c:xpColI((/\br="([A-Z]+)\d+"/.exec(x)||[,'A'])[1]),x}));
+  for(const [c,u] of mp){const old=arr.find(a=>a.c===c),os=old&&/\bs="(\d+)"/.exec(old.x),s=os?+os[1]:colS[c],ref=xpCol(c)+rn;let nx;
+   if(u.k==='d')nx='<c r="'+ref+'" s="'+st.dateOf(s)+'"><v>'+u.v+'</v></c>';
+   else if(u.v==='')nx='<c r="'+ref+'"'+(s!=null?' s="'+s+'"':'')+'/>';
+   else nx='<c r="'+ref+'"'+(s!=null?' s="'+s+'"':'')+' t="inlineStr"><is><t xml:space="preserve">'+xpXe(u.v)+'</t></is></c>';
+   if(old)old.x=nx;else arr.push({c,x:nx})}
+  arr.sort((a,b)=>a.c-b.c);
+  return '<row'+attrs.replace(/\sspans="[^"]*"/,'')+'>'+arr.map(a=>a.x).join('')+'</row>'});
+ for(const r of byRow.keys())if(!seen.has(r))throw new Error('řádek '+(r+1)+' v listu nenalezen');
+ return xml}
+// Nový list z tabulky textů a čísel (první řádek je hlavička)
+function xpSheetXml(rows,st){const hs=st.bold();let nc=1;rows.forEach(r=>{nc=Math.max(nc,r.length)});
+ const w=[];for(let j=0;j<nc;j++){let m=8;rows.forEach(r=>{m=Math.max(m,String(r[j]==null?'':r[j]).length+2)});w.push(Math.min(60,m))}
+ const sd=rows.map((r,i)=>'<row r="'+(i+1)+'">'+r.map((v,j)=>{if(v===''||v==null)return '';const ref=xpCol(j)+(i+1);
+  if(typeof v==='number'&&isFinite(v))return '<c r="'+ref+'"'+(i===0?' s="'+hs+'"':'')+'><v>'+v+'</v></c>';
+  return '<c r="'+ref+'"'+(i===0?' s="'+hs+'"':'')+' t="inlineStr"><is><t xml:space="preserve">'+xpXe(v)+'</t></is></c>'}).join('')+'</row>').join('');
+ return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:'+xpCol(nc-1)+Math.max(1,rows.length)+'"/><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/><cols>'+w.map((x,j)=>'<col min="'+(j+1)+'" max="'+(j+1)+'" width="'+x+'" customWidth="1"/>').join('')+'</cols><sheetData>'+sd+'</sheetData></worksheet>'}
+// o = {sheetName, upd, hr, sheets:{Název:[řádky]|null}, mime}
+async function xlsxPatch(src,o){
+ const ents=xpUnzip(src),get=n=>ents.find(e=>e.name===n);
+ const rd=async n=>{const e=get(n);if(!e)throw new Error('chybí '+n);if(e.me===0)return xpTD.decode(e.raw);if(e.me!==8)throw new Error('metoda '+e.me);return xpTD.decode(await xpInflate(e.raw))};
+ const put=(n,s)=>{const i=ents.findIndex(e=>e.name===n),ne=xpEnt(n,s);if(i>=0)ents[i]=ne;else ents.push(ne)};
+ let wb=await rd('xl/workbook.xml'),rels=await rd('xl/_rels/workbook.xml.rels'),ct=await rd('[Content_Types].xml');
+ const sheets=(wb.match(/<sheet\b[^>]*?\/>/g)||[]).map(t=>({name:xpUn((/\bname="([^"]*)"/.exec(t)||[,''])[1]),rid:(/\b\w+:id="([^"]*)"/.exec(t)||[])[1],sid:+((/\bsheetId="(\d+)"/.exec(t)||[,0])[1])}));
+ if(!sheets.length)throw new Error('žádné listy');
+ const px=(/\b(\w+):id="/.exec((wb.match(/<sheet\b[^>]*?\/>/)||[''])[0])||[,'r'])[1];
+ const pathOf=s=>{const re=/<Relationship\b[^>]*?\/>/g;let m;while((m=re.exec(rels))){if(new RegExp('\\bId="'+s.rid+'"').test(m[0])){const t=(/\bTarget="([^"]*)"/.exec(m[0])||[,''])[1];return t[0]==='/'?t.slice(1):'xl/'+t}}throw new Error('vazba listu')};
+ const st=xpStyles(await rd('xl/styles.xml'));
+ const ms=sheets.find(s=>s.name===o.sheetName);if(!ms)throw new Error('list '+o.sheetName+' nenalezen');
+ const mp=pathOf(ms);put(mp,xpPatch(await rd(mp),o.upd,o.hr,st));
+ let nn=0,nr=0;for(const e of ents){const m=/^xl\/worksheets\/sheet(\d+)\.xml$/.exec(e.name);if(m)nn=Math.max(nn,+m[1])}
+ {const re=/\bId="rId(\d+)"/g;let m;while((m=re.exec(rels)))nr=Math.max(nr,+m[1])}
+ let sid=Math.max(0,...sheets.map(s=>s.sid));
+ for(const [name,rows] of Object.entries(o.sheets||{})){if(!rows)continue;const ex=sheets.find(s=>s.name===name),xml=xpSheetXml(rows,st);
+  if(ex)put(pathOf(ex),xml);
+  else{nn++;nr++;sid++;const fn='xl/worksheets/sheet'+nn+'.xml';put(fn,xml);
+   wb=wb.replace('</sheets>','<sheet xmlns:'+px+'="http://schemas.openxmlformats.org/officeDocument/2006/relationships" name="'+xpXe(name)+'" sheetId="'+sid+'" '+px+':id="rId'+nr+'"/></sheets>');
+   rels=rels.replace('</Relationships>','<Relationship Id="rId'+nr+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+nn+'.xml"/></Relationships>');
+   ct=ct.replace('</Types>','<Override PartName="/'+fn+'" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>');
+   sheets.push({name,rid:'rId'+nr,sid})}}
+ put('xl/workbook.xml',wb);put('xl/_rels/workbook.xml.rels',rels);put('[Content_Types].xml',ct);
+ if(st.dirty)put('xl/styles.xml',st.out());
+ return xpZip(ents,o.mime)}
+
 async function exp(mode){
  mode=mode==='all'?'all':'mine';const mineOnly=mode==='mine';
  if(!norm(S.who)){toast('Nejdřív vyplň své jméno.');const w=$('who');if(w)w.focus();return}
  tagAuth();
  if(WB && WB.Workbook){delete WB.Workbook.Names;}
  const me=nm(S.who),cfs=S.cf||{};
+ const U=[];
  const serialOf=ts=>{const n=new Date(ts||Date.now());return Math.round(Date.UTC(n.getFullYear(),n.getMonth(),n.getDate())/86400000)+25569},dtOf=ts=>new Date(ts||Date.now()).toLocaleDateString('cs-CZ');
- const putD=(ri,c,ts)=>{if(c>=0)WS[XLSX.utils.encode_cell({r:ri,c})]={t:'n',v:serialOf(ts),z:'dd.mm.yyyy'}},put=(ri,c,val)=>{
-  if(c>=0){
+ const putD=(ri,c,ts)=>{if(c>=0){U.push({ri,c,k:'d',v:serialOf(ts)});WS[XLSX.utils.encode_cell({r:ri,c})]={t:'n',v:serialOf(ts),z:'dd.mm.yyyy'}}},put=(ri,c,val)=>{
+  if(c>=0){U.push({ri,c,k:'s',v:val});
    const cellKey=XLSX.utils.encode_cell({r:ri,c});
    if(!WS[cellKey]) WS[cellKey]={t:'s',v:val};
    else { WS[cellKey].t='s'; WS[cellKey].v=val; delete WS[cellKey].w; }
@@ -415,28 +517,43 @@ async function exp(mode){
   put(d.ri,COL.nt,[d.n,r.nt,r.lc?'Umístění: '+r.lc:'',r.q&&r.q!==d.q?'Napočteno: '+r.q:'',mcNote(d,r),dupNote(d)].filter(Boolean).join('; '));
   putD(d.ri,COL.dt,r.t);put(d.ri,COL.by,au);wr++});
  // List Prebytky: řádky autorů, které exportujeme, se nahradí; řádky ostatních lidí v souboru zůstanou
- {const xs=S.x.filter(x=>mineOnly?nm(x.by||S.who)===me:true);let old=[];const so=WB.Sheets['Prebytky'];
-  if(so){try{old=XLSX.utils.sheet_to_json(so,{header:1,defval:''}).slice(1).filter(r=>r.some(z=>String(z).trim()))}catch(e){old=[]}
-   delete WB.Sheets['Prebytky'];WB.SheetNames=WB.SheetNames.filter(n=>n!=='Prebytky')}
-  const aus=new Set(mineOnly?[me]:S.x.map(x=>nm(x.by||S.who)).concat(me));
-  const rows=old.filter(r=>!aus.has(nm(r[3]))).concat(xs.map(x=>[x.n,x.p,x.l,x.by||S.who,dtOf(x.t),x.ph?'ANO (v záloze aplikace)':'']));
-  if(rows.length)XLSX.utils.book_append_sheet(WB,XLSX.utils.aoa_to_sheet([['Číslo ze štítku','Popis','Budova','Provedl','Datum','Fotka']].concat(rows)),'Prebytky')}
- if(!mineOnly){
-  if(WB.Sheets['Duplicity']){delete WB.Sheets['Duplicity'];WB.SheetNames=WB.SheetNames.filter(n=>n!=='Duplicity')}
-  const dr=D.filter(d=>d.dc>1);
-  if(dr.length)XLSX.utils.book_append_sheet(WB,XLSX.utils.aoa_to_sheet([['Majetkové číslo','Řádek v souboru','Popis','Výrobní číslo','Budova','Odpovědná osoba','Stav','Napočteno']].concat(dr.map(d=>[d.id,d.ri+1,d.p,d.sn,d.b,d.o,STX[stat(d)],S.r[d.k]?S.r[d.k].q:'']))),'Duplicity')}
- const out=XLSX.write(WB,{bookType:'xlsx',type:'array'}),day=new Date().toISOString().slice(0,10),
-  fn=mineOnly?'Inventura_'+norm(S.who).replace(/[^\p{L}\p{N}]+/gu,'_')+'_'+day+'.xlsx':'Inventura_sloucene_'+day+'.xlsx';
- const where=await saveFile(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),fn);
+ const xs=S.x.filter(x=>mineOnly?nm(x.by||S.who)===me:true);let old=[];const so=WB.Sheets['Prebytky'];
+ if(so){try{old=XLSX.utils.sheet_to_json(so,{header:1,defval:''}).slice(1).filter(r=>r.some(z=>String(z).trim()))}catch(e){old=[]}}
+ const aus=new Set(mineOnly?[me]:S.x.map(x=>nm(x.by||S.who)).concat(me));
+ const hX=['Číslo ze štítku','Popis','Budova','Provedl','Datum','Fotka','Osoba / budova skupiny','Počet fotek'];
+ const xrows=old.filter(r=>!aus.has(nm(r[3]))).concat(xs.map(x=>[x.n,x.p,x.l,x.by||S.who,dtOf(x.t),x.ph?'ANO (v záloze aplikace)':'',String(x.g||'').slice(1),photoKeys(x).length||'']));
+ const hD=['Majetkové číslo','Řádek v souboru','Popis','Výrobní číslo','Budova','Odpovědná osoba','Stav','Napočteno'];
+ const dr=mineOnly?[]:D.filter(d=>d.dc>1),drows=dr.map(d=>[d.id,d.ri+1,d.p,d.sn,d.b,d.o,STX[stat(d)],S.r[d.k]?S.r[d.k].q:'']);
+ // Hlavní cesta: výsledky se zapíšou přímo do původního souboru a jeho formátování zůstane
+ let out=null,patched=false;const macro=/\.xlsm$/i.test(FN);
+ try{
+  if(!SRC||typeof DecompressionStream==='undefined')throw new Error('nepodporováno');
+  out=await xlsxPatch(SRC,{sheetName:SHN,hr:HR+RO,upd:U.map(u=>({ri:u.ri+RO,c:u.c+CO,k:u.k,v:u.v})),
+   sheets:Object.assign({Prebytky:xrows.length?[hX].concat(xrows):(WB.Sheets['Prebytky']?[hX]:null)},mineOnly?{}:{Duplicity:drows.length?[hD].concat(drows):(WB.Sheets['Duplicity']?[hD]:null)}),
+   mime:macro?'application/vnd.ms-excel.sheet.macroEnabled.12':undefined});
+  patched=true}
+ catch(e){try{console.warn('Zápis do původního souboru se nepodařil:',e)}catch(x){}out=null}
+ // Záložní cesta: soubor se přegeneruje knihovnou, ta ale formátování buněk nezachová
+ if(!out){
+  if(WB.Sheets['Prebytky']){delete WB.Sheets['Prebytky'];WB.SheetNames=WB.SheetNames.filter(n=>n!=='Prebytky')}
+  if(xrows.length)XLSX.utils.book_append_sheet(WB,XLSX.utils.aoa_to_sheet([hX].concat(xrows)),'Prebytky');
+  if(!mineOnly){
+   if(WB.Sheets['Duplicity']){delete WB.Sheets['Duplicity'];WB.SheetNames=WB.SheetNames.filter(n=>n!=='Duplicity')}
+   if(drows.length)XLSX.utils.book_append_sheet(WB,XLSX.utils.aoa_to_sheet([hD].concat(drows)),'Duplicity')}
+  out=new Blob([XLSX.write(WB,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})}
+ const day=new Date().toISOString().slice(0,10),
+  fn0=mineOnly?'Inventura_'+norm(S.who).replace(/[^\p{L}\p{N}]+/gu,'_')+'_'+day+'.xlsx':'Inventura_sloucene_'+day+'.xlsx',
+  fn=patched&&macro?fn0.replace(/\.xlsx$/,'.xlsm'):fn0;
+ const where=await saveFile(out,fn);
  if(where===false){toast('Export se nepodařilo uložit');return}
  markSaved();render();
- toast('Export uložen'+(typeof where==='string'?' do '+where:'')+': '+wr+' řádků'+(skCf?', '.concat(skCf,' s konfliktem přeskočeno'):'')+(skOth?', '.concat(skOth,' už vyplnil někdo jiný'):''))}
+ toast('Export uložen'+(typeof where==='string'?' do '+where:'')+': '+wr+' řádků'+(skCf?', '.concat(skCf,' s konfliktem přeskočeno'):'')+(skOth?', '.concat(skOth,' už vyplnil někdo jiný'):'')+(patched?'':' · POZOR: formátování původního souboru se zachovat nepodařilo'),patched?3500:8000)}
 
 function pageHome(){
  const offlineIndicator = '<span class="offline-dot" title="Aplikace připravena pro offline provoz"></span>';
  if(!D.length)return '<header class="top"><h1>Inventura '+offlineIndicator+'</h1><p class="mut">Načti soubor s inventurou (xlsx) z telefonu nebo OneDrive. Data zůstanou jen v tomto telefonu.</p></header><input class="in" placeholder="Kdo provádí inventuru (tvoje jméno)" value="'+esc(S.who)+'" oninput="S.who=this.value;save()"><label class="btn pri" for="fi">Načíst soubor</label><input id="fi" type="file" accept=".xlsx,.xlsm" hidden onchange="pick(event)"><p class="mut sm">Soubor i výsledky se ukládají v tomto telefonu a po obnovení stránky se načtou samy.</p>';
  const n=D.filter(d=>isDone(d)).length;
- return '<header class="top"><h1>Inventura '+offlineIndicator+'</h1><p class="mut sm">'+esc(FN)+'</p>'+bar(n,D.length)+'<p class="mut sm">'+n+' z '+D.length+' položek hotovo</p>'+(C.bkOn&&bkDue()?'<button class="btn bad" onclick="tabSum()">Bez zálohy: '+unsaved()+' položek. Uložit zálohu</button>':'')+viewBar()+'</header>'+
+ return '<header class="top"><h1>Inventura '+offlineIndicator+'</h1><p class="mut sm">'+esc(FN)+'</p>'+bar(n,D.length)+'<p class="mut sm">'+n+' z '+D.length+' položek hotovo</p>'+(storeBad?'<button class="btn bad" onclick="tabSum()">Uložení do telefonu selhalo. Uložit zálohu</button>':'')+(C.bkOn&&bkDue()?'<button class="btn bad" onclick="tabSum()">Bez zálohy: '+unsaved()+' položek. Uložit zálohu</button>':'')+viewBar()+'</header>'+
  (showGrp()?grp():[]).map(l=>'<button class="row loc" data-l="'+esc(l)+'" onclick="go(this.dataset.l)"><b class="num big">'+esc(l)+'</b><span class="num big">'+done(l)+' / '+inLoc(l).length+'</span><span class="span2">'+bar(done(l),inLoc(l).length)+'</span></button>').join('')+noGrpHint()}
 
 const ju=u=>!u||/^pcs?$/i.test(u)?'ks':u;
@@ -571,7 +688,7 @@ function pageSet(){
  const camList=cameraOptions.slice();
  if(C.deviceId&&!camList.some(d=>d.id===C.deviceId))camList.unshift({id:C.deviceId,label:C.deviceLabel||'Dříve vybraná kamera',info:'uložená volba'});
  const fmts=FMT.map(f=>'<label class="sw sws"><span>'+f[1]+'</span><input type="checkbox"'+(C.fm.includes(f[0])?' checked':'')+' onchange="setFm(\''+f[0]+'\',this)"></label>').join('');
- const kamera='<p class="mut sm">Při volbě Automaticky vybírá kameru telefon a u telefonů s více objektivy nemusí zvolit tu nejpřesnější pro čárové kódy. Když některá kamera čte lépe, vyber ji ručně, volba se uloží.</p><button class="btn" onclick="testCameras()">Otestovat dostupné kamery</button><label class="mut sm" for="camdev">Typ kamery</label><select id="camdev" class="in" onchange="setCameraDevice(this.value)"><option value=""'+(!C.deviceId?' selected':'')+'>Automaticky (výběr telefonu)</option>'+camList.map(d=>'<option value="'+esc(d.id)+'"'+(C.deviceId===d.id?' selected':'')+'>'+esc(d.label+' — '+d.info)+'</option>').join('')+'</select><p class="mut sm">'+esc(cameraTestInfo)+'</p>'+
+ const kamera='<p class="mut sm">Při volbě Automaticky vybírá kameru telefon a u telefonů s více objektivy nemusí zvolit tu nejpřesnější pro čárové kódy. Když některá kamera čte lépe, vyber ji ručně, volba se uloží.</p><button class="btn" onclick="testCameras()">Otestovat dostupné kamery</button><button class="btn" style="margin-top:10px" onclick="camTestOpen()">Vyzkoušet čtení kamerou</button><label class="mut sm" for="camdev">Typ kamery</label><select id="camdev" class="in" onchange="setCameraDevice(this.value)"><option value=""'+(!C.deviceId?' selected':'')+'>Automaticky (výběr telefonu)</option>'+camList.map(d=>'<option value="'+esc(d.id)+'"'+(C.deviceId===d.id?' selected':'')+'>'+esc(d.label+' — '+d.info)+'</option>').join('')+'</select><p class="mut sm">'+esc(cameraTestInfo)+'</p>'+
   '<label class="mut sm" for="cam2">Velikost okna kamery</label><select id="cam2" class="in" onchange="setCam(this.value)">'+op('cam',[['s','Malé'],['m','Střední'],['l','Velké (až přes půl displeje)']])+'</select>'+
   '<label class="mut sm" for="car">Oblast čtení</label><select id="car" class="in" onchange="setC(\'ar\',this.value)">'+op('ar',[['band','Široké pásmo u čáry (doporučeno)'],['narrow','Užší pruh u čáry'],['full','Celé okno kamery']])+'</select><p class="mut sm">Čte se jen z oblasti v rámečku, takže se nechytají sousední štítky. Při zapnutém samotném QR nebo Data Matrix se čte celý záběr.</p>';
  const skener='<label class="mut sm" for="ccf">Potvrzení čtení</label><select id="ccf" class="in" onchange="setC(\'cf\',+this.value)">'+op('cf',[[1,'1× (nejrychlejší)'],[2,'2× shodně za sebou (doporučeno)'],[3,'3× shodně za sebou (nejpřesnější)']])+'</select><p class="mut sm">Kód se přijme, až když ho kamera přečte vícekrát stejně. Odstraní to chybná čtení.</p>'+
@@ -627,9 +744,9 @@ async function pdDel(){const pd=v.pd;if(!pd||!pd.sel.length)return;const x=S.x.f
  if(!await askQ('Odstranit vybrané fotky?\n\nOdstraní se fotky přebytku '+fmt(x.n)+' (počet: '+pd.sel.length+'). Akci nelze vrátit.','Odstranit','Zrušit'))return;
  const rm=new Set(pd.sel),keep=photoKeys(x).filter(k=>!rm.has(k));
  for(const k of rm)await idbDel('ph'+k);
- x.phs=keep;x.ph=keep.length?1:0;v.pd=null;save();render();toast('Odstraněno fotografií: '+rm.size)}
+ x.phs=keep;x.ph=keep.length?1:0;x.mt=Date.now();v.pd=null;save();render();toast('Odstraněno fotografií: '+rm.size)}
 function delXPhotos(x){for(const k of photoKeys(x))idbDel('ph'+k)}
-async function appendXPhoto(t,b){const x=S.x.find(y=>y.t===t);if(!x)throw new Error('Přebytek nebyl nalezen');const keys=photoKeys(x),key=String(t)+'_'+Date.now()+'_'+(keys.length+1)+'_'+Math.random().toString(36).slice(2,8);await idbSetMany([['ph'+key,b]]);x.phs=[...keys,key];x.ph=1;save()}
+async function appendXPhoto(t,b){const x=S.x.find(y=>y.t===t);if(!x)throw new Error('Přebytek nebyl nalezen');const keys=photoKeys(x),key=String(t)+'_'+Date.now()+'_'+(keys.length+1)+'_'+Math.random().toString(36).slice(2,8);await idbSetMany([['ph'+key,b]]);x.phs=[...keys,key];x.ph=1;x.mt=Date.now();save()}
 async function shrink(f){const b=await createImageBitmap(f),k=Math.min(1,1000/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);return await new Promise(ok=>c.toBlob(ok,'image/jpeg',.7))}
 function renderXPreviews(){const box=$('xpv');if(!box)return;const c=$('xpc');if(c)c.dataset.m='';box.innerHTML='';const a=v.xphs||[];box.style.display=a.length?'flex':'none';for(const b of a){const im=document.createElement('img');im.className='th';im.alt='Náhled fotografie přebytku';im.src=URL.createObjectURL(b);im.onload=()=>URL.revokeObjectURL(im.src);im.onclick=()=>{if(xpMode()){im.classList.toggle('sel');xpSync()}else im.classList.toggle('big')};box.appendChild(im)}xpcDraw()}
 function xpMode(){const c=$('xpc');return !!c&&c.dataset.m==='1'}
@@ -709,7 +826,7 @@ function sheetScan(){const x=v.res,A=aimDims();let b;
   else b='<p class="warn">Štítek '+esc(fmt(x.n))+' už je zaznamenaný.</p><p class="mut sm">Pokud jde o další fyzický kus se stejným štítkem, zapiš ho jako přebytek. Jinak záznam otevři a uprav, nebo skenuj dál.</p>'+x.dup.map(pickRow).join('')+'<button class="btn" onclick="addDup()">Zapsat další kus jako přebytek</button><button class="btn pri" style="margin-top:10px" onclick="rescan()">Skenovat dál</button>';}
  else if(x.o)b='<p class="warn">Číslo patří do: '+esc(x.o[v.by])+': '+esc(x.o.p)+'</p><button class="btn" onclick="openItem(\''+x.o.k+'\',true)">Otevřít přesto</button>';
  else b='<p class="warn">Číslo není v evidenci.</p>'+(x.xd?'<p class="mut sm">Tento přebytek už je zapsaný. Zapsáním přidáš další kus.</p>':'')+'<input id="xp" class="in" placeholder="Popis nalezeného majetku"><button type="button" class="btn" style="margin:0 0 10px" onclick="takeX()">Vyfotit nalezený majetek</button><input id="xph" type="file" accept="image/*" capture="environment" hidden onchange="xPre(event)"><div id="xpv" class="span2" style="display:none;gap:8px;flex-wrap:wrap;margin:0 0 10px"></div><div id="xpc" class="xpc span2" style="display:none"></div><button class="btn ok" onclick="addX()">Zapsat přebytek</button><button class="btn" style="margin-top:10px" onclick="rescan()">Skenovat dál</button>';
- return '<div class="scrim" onclick="if(event.target===this)closeS()"><div class="sheet" role="dialog" aria-label="Skenování"><div class="hd"><h2>Skenování štítku</h2><button class="xb" onclick="closeS()" aria-label="Zavřít">✕</button></div><div class="cw" id="cw" onclick="focusTap()"><video id="vid" playsinline muted></video><div class="aim'+(A.m==='full'?' full':'')+'" id="aim" style="width:'+Math.round(A.ww*100)+'%;height:'+Math.round(A.hh*100)+'%"></div><button class="tb" id="tb" onclick="torch()">Svítilna</button></div><input id="zm" class="rg" type="range" style="display:none" oninput="setZoom(this.value)" aria-label="Zoom kamery"><button class="btn pri" id="cam" onclick="camOn()" style="display:none">Aktivovat kameru</button><p class="mut sm" id="cst"></p><p class="mut sm">Kamera čte kód sama. Namiř červenou čáru na kód z 15–25 cm a drž telefon v klidu. Když se kód nedaří načíst, zkus Vyfotit štítek: pořídí jeden snímek ve vyšším rozlišení.</p><input id="sn" class="in" inputmode="numeric" autocomplete="off" placeholder="Nebo zadej majetkové číslo" value="'+(x?esc(fmt(x.n)):'')+'" oninput="formatScanInput(this)" onkeydown="if(event.key===\'Enter\')doScan()">'+b+'</div></div>'}
+ return '<div class="scrim" onclick="if(event.target===this)closeS()"><div class="sheet" role="dialog" aria-label="Skenování"><div class="hd"><h2>Skenování štítku</h2><button class="xb" onclick="closeS()" aria-label="Zavřít">✕</button></div><div class="cw" id="cw" onclick="focusTap(event)"><video id="vid" playsinline muted></video><div class="aim'+(A.m==='full'?' full':'')+'" id="aim" style="width:'+Math.round(A.ww*100)+'%;height:'+Math.round(A.hh*100)+'%"></div><button class="tb" id="tb" onclick="event.stopPropagation();torch()">Svítilna</button></div><input id="zm" class="rg" type="range" style="display:none" oninput="setZoom(this.value)" aria-label="Zoom kamery"><button class="btn pri" id="cam" onclick="camOn()" style="display:none">Aktivovat kameru</button><p class="mut sm" id="cst"></p><p class="mut sm">Kamera čte kód sama. Namiř červenou čáru na kód z 15–25 cm a drž telefon v klidu. Když se kód nedaří načíst, zkus Vyfotit štítek: pořídí jeden snímek ve vyšším rozlišení.</p><input id="sn" class="in" inputmode="numeric" autocomplete="off" placeholder="Nebo zadej majetkové číslo" value="'+(x?esc(fmt(x.n)):'')+'" oninput="formatScanInput(this)" onkeydown="if(event.key===\'Enter\')doScan()">'+b+'</div></div>'}
 
 function render(){$('app').dataset.tab=v.tab;const p=v.tab==='sum'?pageSum():v.tab==='set'?pageSet():v.loc?pageLoc():pageHome();
  $('app').innerHTML=p+'<nav class="nav"><button class="'+(v.tab==='home'?'on':'')+'" onclick="tabHome()">INVENTURA</button><button class="'+(v.tab==='sum'?'on':'')+'" onclick="tabSum()">SOUHRN</button><button class="'+(v.tab==='set'?'on':'')+'" onclick="tabSet()" aria-label="Nastavení" title="Nastavení"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button><button onclick="quitApp()" aria-label="Ukončit aplikaci" title="Ukončit aplikaci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button></nav>'+(v.hist?sheetHist():v.it?sheetItem():v.sc?sheetScan():'')+(v.rs?sheetReset():'')+(v.nf?sheetNew():'');if(v.tab==='set')chkApk();if(v.tab==='set'||v.tab==='sum')enhSel();loadPhotos()}
@@ -800,6 +917,7 @@ function reset(){v.rs=true;render()}
 function doReset(){if($('rsi').value.trim().toUpperCase()!=='SMAZAT')return;S.x.forEach(delXPhotos);S.r={};S.cf={};S.x=[];S.log=[];S.t0=0;S.bk=null;save();v.rs=false;render();toast('Výsledky smazány')}
 function sheetReset(){const n=Object.keys(S.r).length;
  return '<div class="scrim" onclick="if(event.target===this)closeS()"><div class="sheet" role="alertdialog" aria-label="Smazat výsledky"><div class="hd"><h2>Smazat výsledky?</h2><button class="xb" onclick="closeS()" aria-label="Zavřít">✕</button></div><p>Smaže se <b>'+n+'</b> záznamů o položkách a <b>'+S.x.length+'</b> přebytků uložených v tomto telefonu. Načtený soubor se nesmaže. Akci nelze vrátit.</p><button class="btn" onclick="backup()">Nejdřív uložit zálohu (JSON)</button><label class="mut sm" for="rsi">Pro potvrzení napiš SMAZAT:</label><input id="rsi" class="in" autocomplete="off" autocapitalize="characters" oninput="$(\'rsb\').disabled=this.value.trim().toUpperCase()!==\'SMAZAT\'"><div class="two"><button class="btn" onclick="closeS()">Zrušit</button><button class="btn bad" id="rsb" disabled onclick="doReset()">Smazat</button></div></div></div>'}
+let fnote=false,camTok=0,zxN=0;
 let loopId=0,lastAct=0,lastFmt='',stream=null,tm,busy=false,last='',lt=0,det=null,detKey='',zx=null,zxKey='',cand='',candN=0,candT=0,track=null,tOn=false;
 const FMT=[['code_128','Code 128','CODE_128'],['code_39','Code 39','CODE_39'],['ean_13','EAN-13','EAN_13'],['ean_8','EAN-8','EAN_8'],['itf','ITF (2 z 5)','ITF'],['codabar','Codabar','CODABAR'],['qr_code','QR kód','QR_CODE'],['data_matrix','Data Matrix','DATA_MATRIX']];
 const oneD=f=>f!=='qr_code'&&f!=='data_matrix';
@@ -821,17 +939,17 @@ function getZx(){
  const h=new Map();h.set(ZXing.DecodeHintType.TRY_HARDER,true);
  h.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,FMT.filter(x=>f.includes(x[0])).map(x=>ZXing.BarcodeFormat[x[2]]).filter(x=>x!==undefined));
  const r=new ZXing.MultiFormatReader();r.setHints(h);zx={r,h};zxKey=key;return zx}
-async function dec(src){
+async function dec(src,force){
  const dt=await getDet();
  if(dt){try{const r=await dt.detect(src);if(r.length){
   if(r.length>1){const cx=src.width/2,cy=src.height/2,dd=b=>{const q=b.boundingBox;return q?Math.hypot(q.x+q.width/2-cx,q.y+q.height/2-cy):0};r.sort((a,b)=>dd(a)-dd(b))}
   lastFmt=r[0].format||'';return r[0].rawValue}}catch(e){}}
  const z=getZx();
- if(z){try{const res=z.r.decode(new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(new ZXing.HTMLCanvasElementLuminanceSource(src))),z.h);try{lastFmt=String(ZXing.BarcodeFormat[res.getBarcodeFormat()]||'')}catch(e){}return res.getText()}catch(e){}}
+ if(z&&(force||!dt||(zxN=(zxN+1)%3)===0)){try{const res=z.r.decode(new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(new ZXing.HTMLCanvasElementLuminanceSource(src))),z.h);try{lastFmt=String(ZXing.BarcodeFormat[res.getBarcodeFormat()]||'')}catch(e){}return res.getText()}catch(e){}}
  return null}
 function formatScanInput(el){const pos=el.selectionStart||0,digits=el.value.slice(0,pos).replace(/\D/g,'').length;el.value=fmt(el.value);let p=0,n=0;while(p<el.value.length&&n<digits){if(/\d/.test(el.value[p]))n++;p++}if(digits===0)p=0;try{el.setSelectionRange(p,p)}catch(e){}}
 function accept(t){last=t;lt=Date.now();if(lastFmt){C.lf=String(lastFmt).toLowerCase();saveC()}const e=$('sn');if(e)e.value=fmt(t);doScan()}
-async function decImg(src){for(const m of [2000,1400,900]){const k=Math.min(1,m/Math.max(src.width,src.height)),c=document.createElement('canvas');c.width=Math.round(src.width*k);c.height=Math.round(src.height*k);c.getContext('2d',{willReadFrequently:true}).drawImage(src,0,0,c.width,c.height);let t=null;try{t=await dec(c)}catch(e){}if(t&&(!C.val||/\d{6,}/.test(t)))return t}return null}
+async function decImg(src){for(const m of [2000,1400,900]){const k=Math.min(1,m/Math.max(src.width,src.height)),c=document.createElement('canvas');c.width=Math.round(src.width*k);c.height=Math.round(src.height*k);c.getContext('2d',{willReadFrequently:true}).drawImage(src,0,0,c.width,c.height);let t=null;try{t=await dec(c,true)}catch(e){}if(t&&(!C.val||/\d{6,}/.test(t)))return t}return null}
 // Vyfotit štítek: když běží kamera, pořídí se snímek v plném rozlišení přímo v aplikaci (funguje i po přidání na plochu). Jinak se otevře fotoaparát telefonu.
 async function snap(){
  if(!stream){const i=$('ph');if(i)i.click();return}
@@ -840,10 +958,13 @@ async function snap(){
  try{if(!bmp)bmp=await createImageBitmap($('vid'))}catch(e){}
  const t=bmp?await decImg(bmp):null;busy=false;if(!stream)return;
  if(t)accept(t);else say('Kód se nepodařilo přečíst. Zkus změnit vzdálenost, chvíli drž telefon v klidu a vyfoť znovu.')}
-async function focusTap(){
- lastAct=Date.now();if(!track)return;
+async function focusTap(ev){
+ lastAct=Date.now();
+ try{const cw=$('cw');if(cw&&ev&&ev.clientX!=null){const r=cw.getBoundingClientRect(),d=document.createElement('div');d.className='fr';d.style.left=(ev.clientX-r.left)+'px';d.style.top=(ev.clientY-r.top)+'px';cw.appendChild(d);setTimeout(()=>d.remove(),750)}}catch(e){}
+ if(!track)return;
  try{
   const caps=track.getCapabilities?track.getCapabilities():{};
+  if(!fnote&&!(caps.focusMode&&(caps.focusMode.includes('single-shot')||caps.focusMode.includes('continuous')))){fnote=true;toast('Tato kamera ostření klepnutím nepodporuje, ostří sama.')}
   // Explicit standard constraint is more consistently honored by Android browsers;
   // advanced constraints remain a fallback for implementations that expose only those.
   if(caps.focusMode&&caps.focusMode.includes('single-shot')){
@@ -880,10 +1001,10 @@ async function openCam(){
 function camFirstAsk(){if(C.deviceId||C.camAsk)return;C.camAsk=1;saveC();
  setTimeout(async()=>{if(!stream||!v.sc)return;
   if(await askQ('Vybrat kameru?\n\nTelefon má víc kamer a automatický výběr nemusí zvolit tu nejpřesnější pro čárové kódy. Chceš si kameru vybrat teď? Půjde to i později v Nastavení.','Vybrat kameru','Později')){closeS();tabSet()}},900)}
-async function camOn(){camOff();try{
- await getDet();
- {const o=await openCam();stream=o.s;if(o.fb)toast('Vybraná kamera není dostupná, tentokrát použita automatická volba')}
- track=stream.getVideoTracks()[0];wake();
+async function camOn(){camOff();const tok=camTok;try{
+ await getDet();if(tok!==camTok)return;
+ {const o=await openCam();if(tok!==camTok){try{o.s.getTracks().forEach(x=>x.stop())}catch(e){}return}stream=o.s;if(o.fb)toast('Vybraná kamera není dostupná, tentokrát použita automatická volba')}
+ track=stream.getVideoTracks()[0];fnote=false;wake();
  try{
   const caps=track.getCapabilities?track.getCapabilities():{};
   if(caps.focusMode&&caps.focusMode.includes('continuous')){
@@ -893,7 +1014,7 @@ async function camOn(){camOff();try{
    try{await track.applyConstraints({exposureMode:'continuous'})}catch(e){}
   }
  }catch(e){}
- const vd=$('vid');vd.srcObject=stream;await vd.play();await frameReady(vd,1500);if(!stream)return;$('cw').style.display='block';$('cam').style.display='none';camFirstAsk();
+ const vd=$('vid');vd.srcObject=stream;await vd.play();await frameReady(vd,1500);if(tok!==camTok||!stream)return;$('cw').style.display='block';$('cam').style.display='none';camFirstAsk();
  try{const cp=track.getCapabilities?track.getCapabilities():{};if(cp.torch&&$('tb'))$('tb').style.display='block';if(cp.zoom&&$('zm')){const z=$('zm');z.min=cp.zoom.min;z.max=Math.min(cp.zoom.max,5);z.step=cp.zoom.step||.1;z.value=Math.min(Math.max(C.zoom||1,cp.zoom.min),z.max);z.style.display='block';setZoom(z.value)}}catch(e){}
  const c=document.createElement('canvas'),x=c.getContext('2d',{willReadFrequently:true}),need=C.cf||1,say=m=>{const e=$('cst');if(e)e.textContent=m};
  cand='';candN=0;say('Hledám kód…');
@@ -921,10 +1042,47 @@ async function camOn(){camOff();try{
   if(idle>120000){pauseCam();return}
   tm=setTimeout(loop,idle>4000?600:300)};
  loop()
- }catch(e){const cb=$('cam'),cw=$('cw'),st=$('cst'),msg=cameraErrorText(e);if(cw)cw.style.display='none';if(cb)cb.style.display='block';if(st)st.textContent=msg;toast('Kameru se nepodařilo spustit. Zobrazili jsme doporučení u skeneru.')}}
+ }catch(e){if(tok!==camTok)return;const cb=$('cam'),cw=$('cw'),st=$('cst'),msg=cameraErrorText(e);if(cw)cw.style.display='none';if(cb)cb.style.display='block';if(st)st.textContent=msg;toast('Kameru se nepodařilo spustit. Zobrazili jsme doporučení u skeneru.')}}
+// ===== Zkouška čtení vybranou kamerou (Nastavení): srovnání kamer na skutečném štítku =====
+let ct=null;
+function ctSay(m){const e=$('cts');if(!e||!ct)return;e.textContent=m||('Rozlišení '+(ct.res||'?')+' · první přečtení: '+(ct.first==null?'zatím nic':ct.first.toFixed(1).replace('.',',')+' s')+' · přečteno '+ct.reads+'×'+(ct.last?' · poslední: '+fmt(ct.last):''))}
+function ctChips(){const b=$('ctl');if(!b||!ct)return;b.innerHTML='';
+ const add=(id,lab)=>{const x=document.createElement('button');x.type='button';x.className='chip'+(ct.id===id?' on':'');x.textContent=lab;x.onclick=()=>ctStart(id);b.appendChild(x)};
+ add('','Automaticky');cameraOptions.forEach((d,i)=>add(d.id,(d.label||('Kamera '+(i+1))).slice(0,30)))}
+function ctStop(){if(!ct)return;clearTimeout(ct.tm);if(ct.s){try{ct.s.getTracks().forEach(x=>x.stop())}catch(e){}}ct.s=null;try{ct.vid.srcObject=null}catch(e){}}
+function camTestClose(){if(!ct)return;ctStop();ct.el.remove();ct=null}
+function ctReset(){if(!ct)return;ct.t0=Date.now();ct.reads=0;ct.first=null;ct.last='';ctSay()}
+async function ctStart(id){if(!ct)return;const my=++ct.gen;ctStop();ct.id=id;ctChips();ctSay('Spouštím kameru…');
+ try{const base={width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:30,max:30}};
+  const s=await navigator.mediaDevices.getUserMedia({video:id?Object.assign({},base,{deviceId:{exact:id}}):Object.assign({},base,{facingMode:{ideal:'environment'}}),audio:false});
+  if(!ct||my!==ct.gen){s.getTracks().forEach(x=>x.stop());return}
+  ct.s=s;const tr=s.getVideoTracks()[0];
+  try{const caps=tr.getCapabilities?tr.getCapabilities():{};if(caps.focusMode&&caps.focusMode.includes('continuous'))await tr.applyConstraints({focusMode:'continuous'})}catch(e){}
+  const vd=ct.vid;vd.srcObject=s;await vd.play();await frameReady(vd,1500);if(!ct||my!==ct.gen)return;
+  ct.res=vd.videoWidth+'×'+vd.videoHeight;ctReset();
+  const c=document.createElement('canvas'),x=c.getContext('2d',{willReadFrequently:true});
+  const loop=async()=>{if(!ct||my!==ct.gen)return;
+   if(vd.videoWidth){const k=Math.min(1,1280/vd.videoWidth);c.width=Math.round(vd.videoWidth*k);c.height=Math.round(vd.videoHeight*k);x.drawImage(vd,0,0,c.width,c.height);
+    let t=null;try{t=await dec(c)}catch(e){}
+    if(!ct||my!==ct.gen)return;
+    if(t&&(!C.val||/\d{6,}/.test(t))){ct.reads++;if(ct.first==null)ct.first=(Date.now()-ct.t0)/1000;ct.last=t;ctSay()}}
+   ct.tm=setTimeout(loop,250)};
+  loop()
+ }catch(e){if(ct&&my===ct.gen)ctSay('Kameru se nepodařilo spustit ('+((e&&e.name)||'chyba')+').')}}
+async function camTestOpen(){
+ if(ct||v.sc)return;
+ if(!cameraOptions.length){toast('Nejdřív klepni na Otestovat dostupné kamery');return}
+ camOff();
+ const el=document.createElement('div');el.className='scrim csp';el.style.alignItems='center';el.style.zIndex=48;
+ el.innerHTML='<div class="sheet" role="dialog" aria-label="Zkouška čtení kamerou" style="max-width:420px;width:calc(100% - 32px);border-radius:12px"><h2>Zkouška čtení</h2><p class="mut sm">Namiř kameru na štítek a sleduj, jak rychle a jak často ho přečte. Přepínáním kamer je porovnáš. Čísla ovlivňuje i vzdálenost a světlo, měř vždy stejně.</p><video playsinline muted style="display:block;width:100%;height:200px;object-fit:cover;background:#000;border-radius:8px;margin:8px 0"></video><div class="chips" id="ctl"></div><p class="sm" id="cts"></p><div class="two"><button class="btn" type="button" id="ctz">Vynulovat měření</button><button class="btn pri" type="button" id="ctu">Použít tuto kameru</button></div><button class="btn" type="button" id="ctc" style="margin-top:10px">Zavřít</button></div>';
+ ct={el,gen:0,id:C.deviceId||'',s:null,vid:el.querySelector('video'),reads:0,first:null,last:'',res:'',t0:Date.now(),tm:0};
+ el.addEventListener('click',e=>{if(e.target===el)camTestClose()});
+ el.querySelector('#ctc').onclick=camTestClose;el.querySelector('#ctz').onclick=ctReset;
+ el.querySelector('#ctu').onclick=()=>{const id=ct.id;setCameraDevice(id);camTestClose();render();toast(id?'Kamera uložena':'Nastavena automatická kamera')};
+ document.body.appendChild(el);ctChips();ctStart(ct.id)}
 async function torch(){try{tOn=!tOn;await track.applyConstraints({advanced:[{torch:tOn}]})}catch(e){tOn=false;toast('Svítilnu se nepodařilo zapnout')}}
 function pauseCam(){camOff();const cb=$('cam'),cw=$('cw'),st=$('cst'),zm=$('zm'),tb=$('tb');if(cw)cw.style.display='none';if(zm)zm.style.display='none';if(tb)tb.style.display='none';if(cb)cb.style.display='block';if(st)st.textContent='Kamera se po 2 minutách pozastavila, aby šetřila baterii. Klepni na Aktivovat kameru.'}
-function camOff(){loopId++;clearTimeout(tm);clearInterval(tm);if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;track=null;tOn=false;unwake()}
+function camOff(){camTok++;loopId++;clearTimeout(tm);clearInterval(tm);if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;track=null;tOn=false;unwake()}
 async function photo(e){for(const f of e.target.files){try{const b=await createImageBitmap(f),t=await decImg(b);if(t){accept(t);break}else toast('Kód se nepodařilo přečíst.')}catch(x){toast('Foto se nepodařilo zpracovat')}}e.target.value=''}
 
 // Ochrana proti nechtěnému zavření stránky / gestu zpět při rozpracované inventuře
@@ -973,6 +1131,7 @@ function openSel(sel,btn){
  document.body.appendChild(el);if(cur){cur.scrollIntoView({block:'center'});cur.focus()}}
 // ===== Tlačítko Zpět vždy vrací o krok a aplikaci nezavře =====
 function backStep(){
+ if(ct){camTestClose();return}
  if(shoot){shoot.close(null);return}
  const dlg=document.querySelector('body > .scrim');
  if(dlg){if(dlg.classList.contains('csp')){dlg.remove();return}const b=dlg.querySelector('button');if(b)b.click();return}
